@@ -1,0 +1,39 @@
+{{ if not .Values.PRODUCTION_MODE }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    {{- if .Values.OPS_IDP_URL }}
+    nginx.ingress.kubernetes.io/auth-signin: https://{{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/start?rd=https://$host$request_uri$is_args$args
+    nginx.ingress.kubernetes.io/auth-url: https://{{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/auth
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $token $upstream_http_authorization;
+      proxy_set_header Authorization $token;
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 8k
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    {{- end }}
+  labels:
+    application: '{{ .Values.SERVICE_NAME }}'
+    name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+  name: {{ .Values.SERVICE_NAME }}
+  namespace: {{ .Values.NAMESPACE }}
+spec:
+  {{- if .Values.OPS_IDP_URL }}
+  ingressClassName: nginx
+  {{- end }}
+  rules:
+    - host: {{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Values.SERVICE_NAME }}
+                port:
+                  name: {{ if .Values.OPS_IDP_URL }}jupyter{{ else }}web{{ end }}
+            path: /
+            pathType: ImplementationSpecific
+{{- end }}

@@ -1,0 +1,118 @@
+{{- if and .Values.OPS_IDP_URL (not .Values.PRODUCTION_MODE) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    name: oauth2-proxy
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Values.NAMESPACE | nospace | trunc 63 }}'
+    app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+    app.kubernetes.io/technology: python
+  name: oauth2-proxy
+spec:
+  replicas: 1
+  strategy:
+    {{- if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "recreate" }}
+      type: Recreate
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "best_effort_controlled_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 0
+        maxUnavailable: 80%
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "ramped_slow_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 0
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "custom_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: {{ .Values.DEPLOYMENT_STRATEGY_MAXSURGE | default "25%" }}
+        maxUnavailable: {{ .Values.DEPLOYMENT_STRATEGY_MAXUNAVAILABLE | default "25%" }}
+    {{- else }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+    {{- end }}
+  selector:
+    matchLabels:
+      k8s-app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        k8s-app: oauth2-proxy
+    spec:
+      containers:
+        - args:
+            - --cookie-domain=.{{ .Values.CLOUD_PUBLIC_HOST }}
+            - --cookie-secure=false
+            - --provider=oidc
+            - --client-id={{ .Values.ENVCHECKER_KEYCLOACK_CLIENT_ID }}
+            - --client-secret={{ .Values.ENVCHECKER_KEYCLOACK_CLIENT_SECRET }}
+            - --oidc-issuer-url={{ .Values.OPS_IDP_URL }}/realms/{{ .Values.ENVCHECKER_KEYCLOACK_REALM }}
+            - --http-address=0.0.0.0:8080
+            - --upstream=file:///dev/null
+            - --email-domain=*
+            - --insecure-oidc-allow-unverified-email=true
+            - --set-authorization-header=true
+            - --ssl-insecure-skip-verify=true
+          env:
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              value: d0U3SC9QVENhZEJpaTgxQnhJakJuUT09
+          image: quay.io/oauth2-proxy/oauth2-proxy:latest
+          imagePullPolicy: Always
+          name: oauth2-proxy
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    name: oauth2-proxy
+    app.kubernetes.io/name: oauth2-proxy
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+  name: oauth2-proxy
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    k8s-app: oauth2-proxy
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 8k
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+    app.kubernetes.io/managed-by-operator: env-checker
+  name: oauth-proxy
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: oauth2-proxy
+                port:
+                  number: 8080
+            path: /oauth2
+            pathType: Prefix
+{{- end }}

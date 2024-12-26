@@ -1,0 +1,20 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: '{{ .Values.SERVICE_NAME }}.application-config'
+  labels:
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+data:
+  application.properties: |-
+    {{- if .Values.OPS_IDP_URL }}
+    idpurl={{ .Values.OPS_IDP_URL }}
+    {{- end }}
+    {{- if .Values.KEYCLOACK_CLIENT_SECRET }}
+    secret={{ .Values.KEYCLOACK_CLIENT_SECRET }}
+    {{- end }}
+    {{- if .Values.CLOUD_PUBLIC_HOST }}
+    cloudHost={{ .Values.CLOUD_PUBLIC_HOST }}
+    {{- end }}

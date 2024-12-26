@@ -1,0 +1,37 @@
+#Creation in Job mode
+{{- if .Values.ENVIRONMENT_CHECKER_JOB_COMMAND }}
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: '{{ printf "%s-job" .Values.SERVICE_NAME }}'
+  labels:
+    name: '{{ printf "%s-job" .Values.SERVICE_NAME }}'
+    application: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      restartPolicy: Never
+      containers:
+        - name: '{{ printf "%s-job" .Values.SERVICE }}'
+          image: '{{ .Values.IMAGE_REPOSITORY }}:{{ .Values.TAG }}'
+          command: [ "/bin/sh", "-c", "$(ENVIRONMENT_CHECKER_JOB_COMMAND)" ]
+          env:
+            - name: "ENVIRONMENT_CHECKER_JOB_COMMAND"
+              value: '{{ .Values.ENVIRONMENT_CHECKER_JOB_COMMAND }}'
+            {{- include "envchecker.pod.env" . | nindent 12 }}
+          volumeMounts:
+            {{- include "envchecker.pod.volumeMounts" . | nindent 12 }}
+          resources:
+            {{- include "envchecker.pod.resources" . | nindent 12 }}
+
+      {{- include "envchecker.pod.volumes" . | nindent 6 }}
+    {{ with .Values.NODE_SELECTOR_LABELS }}
+    nodeSelector:
+      {{ toYaml . | nindent 6 }}
+    {{ end }}
+{{- end }}

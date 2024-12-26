@@ -1,0 +1,37 @@
+---
+{{- define "envchecker.pod.env" }}
+- name: "CLOUD_NAME"
+  value: '{{ .Values.CLOUD_NAME }}'
+- name: "NAMESPACE"
+  value: '{{ .Values.NAMESPACE }}'
+- name: "PRODUCTION_MODE"
+  value: '{{ .Values.PRODUCTION_MODE }}'
+- name: "ENVIRONMENT_CHECKER_UI_ACCESS_TOKEN"
+  valueFrom:
+    secretKeyRef:
+      name: env-checker-ui-access-token
+      key: access-token
+{{- end }}
+{{- define "envchecker.pod.volumeMounts" }}
+- name: application-config
+  mountPath: "/etc/config/application.properties"
+{{- end }}
+
+{{- define "envchecker.pod.resources" }}
+requests:
+  cpu: '{{ .Values.CPU_REQUEST }}'
+  memory: '{{ .Values.MEMORY_REQUEST }}'
+limits:
+  memory: '{{ .Values.MEMORY_LIMIT }}'
+  cpu: '{{ .Values.CPU_LIMIT }}'
+{{- end }}
+
+{{- define "envchecker.pod.volumes" }}
+volumes:
+  - name: application-config
+    configMap:
+      name: '{{ .Values.SERVICE_NAME }}.application-config'
+      items:
+        - key: "application.properties"
+          path: "application.properties"
+{{- end }}

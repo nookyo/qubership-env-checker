@@ -1,0 +1,9 @@
+.idea
+.DS_Store
+.project
+.classpath
+.settings
+.temp*
+target
+*.log
+**/__pycache__/*

@@ -1,0 +1,33 @@
+#Service account of env-checker, that will be bound with cluster role
+serviceAccount:
+  name: env-checker-sa
+
+#Defines microservice name
+SERVICE_NAME: "env-checker"
+APPLICATION_NAME: "env-checker"
+MANAGED_BY: "saasDeployer"
+#The namespace it is going to be deployed.
+NAMESPACE: ''
+#Artifact descriptor version which is installed.
+ARTIFACT_DESCRIPTOR_VERSION : ''
+IMAGE_REPOSITORY: ''
+TAG: ''
+DELIMITER: "-"
+DEPLOYMENT_SESSION_ID: ''
+CLOUD_NAME: ''
+CSE_CLOUD: ''
+CSE_TENANT: ''
+READONLY_CONTAINER_FILE_SYSTEM_ENABLED: false
+#Jupyter lab access token value
+ENVIRONMENT_CHECKER_UI_ACCESS_TOKEN: 'f9a3bd4e9f2c3be01cd629154cfb224c2703181e050254b5'
+
+# Specific env-check variables
+ENVIRONMENT_CHECKER_JOB_COMMAND: ''
+ENVIRONMENT_CHECKER_CRON_JOB_COMMAND: ''
+ENVIRONMENT_CHECKER_CRON_SCHEDULE: '0 0 */12 * *'
+#Parameters related to oauth proxy
+OPS_IDP_URL: ''
+ENVCHECKER_KEYCLOACK_REALM: ''
+ENVCHECKER_KEYCLOACK_CLIENT_ID: ''
+ENVCHECKER_KEYCLOACK_CLIENT_SECRET: ''
+CLOUD_PUBLIC_HOST: ''
