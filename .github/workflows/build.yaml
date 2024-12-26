@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         component:
-          - name: qubership-fluentd
+          - name: qubership-env-checker
             file: Dockerfile
     runs-on: ubuntu-latest
     steps:
