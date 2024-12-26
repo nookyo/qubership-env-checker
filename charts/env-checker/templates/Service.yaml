@@ -1,0 +1,29 @@
+{{ if not .Values.PRODUCTION_MODE }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: '{{ .Values.SERVICE_NAME }}'
+  labels:
+    application: '{{ .Values.APPLICATION_NAME }}'
+    name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+spec:
+  ports:
+    {{- if .Values.OPS_IDP_URL }}
+    - name: web
+      port: 8080
+      targetPort: 8080
+    - name: jupyter
+      port: 8888
+      targetPort: 8888
+    {{- else }}
+    - name: web
+      port: 8888
+      targetPort: 8888
+    {{- end }}
+  selector:
+    name: '{{ .Values.SERVICE_NAME }}'
+{{ end }}

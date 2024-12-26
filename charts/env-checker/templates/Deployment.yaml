@@ -1,0 +1,103 @@
+# Building Deployment in case it is: dev, qa, pre-prod and other non prod environments
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: '{{ .Values.SERVICE_NAME }}'
+  labels:
+    name: '{{ .Values.SERVICE_NAME }}'
+    application: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Values.NAMESPACE | nospace | trunc 63 }}'
+    app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
+    app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+    app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+    app.kubernetes.io/technology: python
+spec:
+  replicas: {{ .Values.REPLICAS }}
+  revisionHistoryLimit: {{ .Values.RC_REVISIONS }}
+  strategy:
+    {{- if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "recreate" }}
+      type: Recreate
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "best_effort_controlled_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 0
+        maxUnavailable: 80%
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "ramped_slow_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 0
+    {{- else if eq (default "" .Values.DEPLOYMENT_STRATEGY_TYPE) "custom_rollout" }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: {{ .Values.DEPLOYMENT_STRATEGY_MAXSURGE | default "25%" }}
+        maxUnavailable: {{ .Values.DEPLOYMENT_STRATEGY_MAXUNAVAILABLE | default "25%" }}
+    {{- else }}
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+    {{- end }}
+  template:
+    metadata:
+      labels:
+        name: '{{ .Values.SERVICE_NAME }}'
+        application: '{{ .Values.APPLICATION_NAME }}'
+        app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Values.NAMESPACE | nospace | trunc 63 }}'
+        app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
+        app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
+        app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
+        app.kubernetes.io/technology: python
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: '{{ .Values.SERVICE_NAME }}'
+          image: '{{ .Values.IMAGE_REPOSITORY }}:{{ .Values.TAG }}'
+          ports:
+            - name: web
+              containerPort: 8888
+              protocol: TCP
+          env:
+            {{- include "envchecker.pod.env" . | nindent 12 }}
+          volumeMounts:
+            {{- include "envchecker.pod.volumeMounts" . | nindent 12 }}
+          resources:
+            {{- include "envchecker.pod.resources" . | nindent 12 }}
+          {{- if eq (default false .Values.ENVIRONMENT_CHECKER_SELF_CHECK_ENABLED) false }}
+          readinessProbe:
+            tcpSocket:
+              port: web
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: web
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          {{- end }}
+          securityContext:
+          {{ if eq .Values.PAAS_PLATFORM "Kubernetes" }}
+            runAsGroup: 10001
+          {{ end }}
+            readOnlyRootFilesystem: {{ .Values.READONLY_CONTAINER_FILE_SYSTEM_ENABLED }}
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+       {{- include "envchecker.pod.volumes" . | nindent 6 }}
+    {{ with .Values.NODE_SELECTOR_LABELS }}
+    nodeSelector:
+      {{ toYaml . | nindent 8 }}
+    {{ end }}
+  selector:
+    matchLabels:
+      name: '{{ .Values.SERVICE_NAME }}'
