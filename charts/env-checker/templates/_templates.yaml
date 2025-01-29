@@ -19,11 +19,11 @@
 
 {{- define "envchecker.pod.resources" }}
 requests:
-  cpu: '{{ .Values.CPU_REQUEST }}'
-  memory: '{{ .Values.MEMORY_REQUEST }}'
+  cpu: '{{ .Values.CPU_REQUEST | default "100m" }}'
+  memory: '{{ .Values.MEMORY_REQUEST | default "1Gi" }}'
 limits:
-  memory: '{{ .Values.MEMORY_LIMIT }}'
-  cpu: '{{ .Values.CPU_LIMIT }}'
+  memory: '{{ .Values.MEMORY_LIMIT | default "2Gi" }}'
+  cpu: '{{ .Values.CPU_LIMIT | default "1000m" }}'
 {{- end }}
 
 {{- define "envchecker.pod.volumes" }}
