@@ -60,7 +60,7 @@ spec:
       {{- end }}
       containers:
         - name: '{{ .Values.SERVICE_NAME }}'
-          image: '{{ .Values.IMAGE_REPOSITORY }}:{{ .Values.TAG }}'
+          image: {{ template "env-checker.image" . }}
           ports:
             - name: web
               containerPort: 8888
