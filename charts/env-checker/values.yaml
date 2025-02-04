@@ -13,8 +13,8 @@ MANAGED_BY: "saasDeployer"
 NAMESPACE: 'default'
 #Artifact descriptor version which is installed.
 ARTIFACT_DESCRIPTOR_VERSION : ''
-IMAGE_REPOSITORY: 'ghcr.io/netcracker/qubership-env-checker'
-TAG: 'main'
+#IMAGE_REPOSITORY: 'ghcr.io/netcracker/qubership-env-checker'
+#TAG: 'main'
 DELIMITER: "-"
 DEPLOYMENT_SESSION_ID: ''
 CLOUD_NAME: 'qubership'

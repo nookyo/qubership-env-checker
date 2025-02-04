@@ -18,7 +18,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: '{{ printf "%s-job" .Values.SERVICE }}'
-          image: '{{ .Values.IMAGE_REPOSITORY }}:{{ .Values.TAG }}'
+          image: {{ template "env-checker.image" . }}
           command: [ "/bin/sh", "-c", "$(ENVIRONMENT_CHECKER_JOB_COMMAND)" ]
           env:
             - name: "ENVIRONMENT_CHECKER_JOB_COMMAND"
