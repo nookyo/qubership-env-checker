@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - '**'
+    paths-ignore:
+      - '.github/**'
+      - 'docs/**'
 env:
   TAG_NAME: ${{ github.event.release.tag_name || (github.ref == 'refs/heads/main' && 'main' || ( inputs.postfix != '' && format('{0}-{1}', github.ref, inputs.postfix) || 'none' )) }}
 
