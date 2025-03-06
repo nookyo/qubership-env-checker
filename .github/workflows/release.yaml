@@ -15,14 +15,6 @@ on:
                 description: 'Path to chart'
                 required: true
                 default: './charts/env-checker/Chart.yaml'
-            # component:
-            #     default:  '[
-            #         {"name": "jaeger-integration-tests", "file": "integration-tests/Dockerfile", "context": "integration-tests"},
-            #         {"name": "jaeger-readiness-probe", "file": "readiness-probe/Dockerfile", "context": "readiness-probe"},
-            #         {"name": "jaeger-transfer", "file": "docker-transfer/Dockerfile", "context": "docker-transfer"}
-            #       ]'
-            #     description: 'Component to docker build'
-            #     required: true
 
 jobs:
   check-tag:
