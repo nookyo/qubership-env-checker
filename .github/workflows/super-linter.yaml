@@ -30,6 +30,7 @@ jobs:
 
       - name: "Load super-linter environment file"
         run: |
+          # shellcheck disable=2086
           if [ -f "./.github/super-linter.env" ]; then
             grep "\S" ./.github/super-linter.env | grep -v "^#"
             grep "\S" ./.github/super-linter.env | grep -v "^#" >> $GITHUB_ENV
