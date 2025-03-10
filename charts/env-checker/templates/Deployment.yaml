@@ -59,6 +59,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
       containers:
         - name: '{{ .Values.SERVICE_NAME }}'
           image: {{ template "env-checker.image" . }}
@@ -86,7 +88,6 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
           securityContext:
-            runAsUser: 10001
             readOnlyRootFilesystem: {{ .Values.READONLY_CONTAINER_FILE_SYSTEM_ENABLED }}
             runAsNonRoot: true
             seccompProfile:

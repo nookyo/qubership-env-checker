@@ -1,5 +1,4 @@
-ARG ROOT_CONTAINER=debian:bullseye-slim
-FROM $ROOT_CONTAINER
+FROM debian:bullseye-slim
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 ARG NB_USER="jovyan"
@@ -86,7 +85,7 @@ RUN set -x && \
     fi && \
     echo "Architecture: ${arch}" && \
     # Download micromamba.tar.bz2
-    wget --no-check-certificate -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2 && \
+    wget -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2 && \
     if [ $? -ne 0 ]; then \
         echo "Failed to download micromamba.tar.bz2"; \
         exit 1; \
@@ -276,9 +275,10 @@ RUN wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd6
     chmod +x /usr/bin/yq && \
     rm yq_linux_amd64.tar.gz
 
-# update apt
-RUN apt -o Acquire::Check-Valid-Until=false update
-RUN apt install golang -y
+# update apt and install go. Uncomment if someday will need to write notebooks on golang
+# apt command is not recommended for installation from Dockerfile
+#RUN apt -o Acquire::Check-Valid-Until=false update
+#RUN apt install golang -y
 
 # Install additional packages
 RUN mamba install --yes \

@@ -16,12 +16,15 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
       restartPolicy: Never
       containers:
         - name: '{{ printf "%s-job" .Values.SERVICE }}'
           image: {{ template "env-checker.image" . }}
           securityContext:
-            runAsUser: 10001
+            runAsNonRoot: true
+            readOnlyRootFilesystem: {{ .Values.READONLY_CONTAINER_FILE_SYSTEM_ENABLED }}
           command: [ "/bin/sh", "-c", "$(ENVIRONMENT_CHECKER_JOB_COMMAND)" ]
           env:
             - name: "ENVIRONMENT_CHECKER_JOB_COMMAND"

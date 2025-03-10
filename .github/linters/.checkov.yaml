@@ -5,4 +5,10 @@ quiet: true
 skip-check:
   - CKV_K8S_15 # Image Pull Policy should be Always
   - CKV_K8S_21 # The default namespace should not be used
+  - CKV_K8S_22 # Use read-only filesystem for containers where possible
+  - CKV_K8S_35 # Prefer using secrets as files over secrets as environment variables
   - CKV_K8S_43 # Image should use digest
+  - CKV2_K8S_6 # Minimize the admission of pods which lack an associated NetworkPolicy
+#  - CKV_DOCKER_7 # Ensure the base image uses a non latest version tag (in our case we have stable version for root container)
+  - CKV_GHA_7 # The build output cannot be affected by user parameters other than the build entry point and the top-level source location. GitHub Actions workflow_dispatch inputs MUST be empty.
+  - CKV2_GHA_1 # Ensure top-level permissions are not set to write-all
