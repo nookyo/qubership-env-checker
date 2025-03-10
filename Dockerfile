@@ -85,7 +85,7 @@ RUN set -x && \
     fi && \
     echo "Architecture: ${arch}" && \
     # Download micromamba.tar.bz2
-    wget -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2 && \
+    wget --no-check-certificate -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2 && \
     if [ $? -ne 0 ]; then \
         echo "Failed to download micromamba.tar.bz2"; \
         exit 1; \
