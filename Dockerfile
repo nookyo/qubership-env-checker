@@ -16,7 +16,7 @@ RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
     bzip2 \
     locales \
-    sudo \
+    #sudo \
     tini \
     wget \
     ca-certificates && \
