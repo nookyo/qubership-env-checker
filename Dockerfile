@@ -258,13 +258,13 @@ WORKDIR "${HOME}"
 #    jupyter labextension disable --level=system "@jupyterlab/apputils-extension:announcements"
 
 # Download and install kubectl
-RUN curl -Lo kubectl-v1.32 https://dl.k8s.io/v1.32.0/bin/linux/amd64/kubectl && \
+RUN wget -O kubectl-v1.32 https://dl.k8s.io/v1.32.0/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl-v1.32 && \
     mv ./kubectl-v1.32 /usr/local/bin/ && \
     ln -s /usr/local/bin/kubectl-v1.32 /usr/local/bin/kubectl
 
 # Download and install yq
-RUN wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64.tar.gz && \
+RUN wget --progress=dot:giga https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64.tar.gz && \
     tar -xzvf yq_linux_amd64.tar.gz -C /usr/bin/ && \
     mv /usr/bin/yq_linux_amd64 /usr/bin/yq && \
     chmod +x /usr/bin/yq && \
@@ -336,8 +336,8 @@ RUN mamba install --yes \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}/"
 
-RUN echo 'export PATH=/opt/conda/bin:$PATH' >> /home/jovyan/.bashrc
-RUN pip install opentelemetry-exporter-prometheus-remote-write
+RUN echo "export PATH=/opt/conda/bin:\$PATH" >> /home/jovyan/.bashrc
+RUN pip install --no-cache-dir opentelemetry-exporter-prometheus-remote-write==0.51b0
 RUN chgrp -Rf root /home/$NB_USER && chmod -Rf g+w /home/$NB_USER
 
 # Switch back to jovyan to avoid accidental container runs as root
