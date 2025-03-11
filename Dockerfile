@@ -14,10 +14,10 @@ USER root
 # Install all OS dependencies for notebook server that starts but lacks all features (e.g., download as all possible file formats)
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    bzip2=1.0.8-5.1build0.1 \
+    bzip2=1.0.8-6 \
     locales=2.39-0ubuntu8.4 \
     sudo=1.9.15p5-3ubuntu5 \
-    tini=0.19.0-1 \
+    tini=0.18.0-1 \
     wget=1.21.4-1ubuntu4.1 \
     ca-certificates=20240203 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
