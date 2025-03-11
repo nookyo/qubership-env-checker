@@ -85,15 +85,13 @@ RUN set -x && \
     fi && \
     echo "Architecture: ${arch}" && \
     # Download micromamba.tar.bz2
-    wget -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2 && \
-    if [ $? -ne 0 ]; then \
+    if ! wget -qO /tmp/micromamba.tar.bz2 https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-linux-64.tar.bz2; then \
         echo "Failed to download micromamba.tar.bz2"; \
         exit 1; \
     fi && \
     echo "Downloaded micromamba.tar.bz2 successfully" && \
     # Extract micromamba.tar.bz2
-    tar -xvjf /tmp/micromamba.tar.bz2 --strip-components=1 -C /tmp bin/micromamba && \
-    if [ $? -ne 0 ]; then \
+    if ! tar -xvjf /tmp/micromamba.tar.bz2 --strip-components=1 -C /tmp bin/micromamba; then \
         echo "Failed to extract micromamba.tar.bz2"; \
         exit 1; \
     fi && \
@@ -106,15 +104,14 @@ RUN set -x && \
     fi && \
     echo "PYTHON_SPECIFIER: ${PYTHON_SPECIFIER}" && \
     # Install packages with micromamba
-    /tmp/micromamba install \
+    if ! /tmp/micromamba install \
         --root-prefix="${CONDA_DIR}" \
         --prefix="${CONDA_DIR}" \
         --yes \
         "${PYTHON_SPECIFIER}" \
         'mamba' \
         'conda<23.9' \
-        'jupyter_core' && \
-    if [ $? -ne 0 ]; then \
+        'jupyter_core'; then \
         echo "Failed to install packages with micromamba"; \
         exit 1; \
     fi && \
@@ -122,8 +119,7 @@ RUN set -x && \
     # Cleanup
     rm /tmp/micromamba && \
     # Debugging: Check if mamba list python works
-    mamba list python > /tmp/mamba_list_python.txt && \
-    if [ $? -ne 0 ]; then \
+    if ! mamba list python > /tmp/mamba_list_python.txt; then \
         echo "Failed to list python packages with mamba"; \
         exit 1; \
     fi && \
@@ -132,28 +128,27 @@ RUN set -x && \
     echo "Content of /tmp/mamba_list_python.txt:" && \
     cat /tmp/mamba_list_python.txt && \
     # Debugging: Use awk to extract the python package line
-    awk '/^python[[:space:]]/ {print $1, $2}' /tmp/mamba_list_python.txt > /tmp/awk_python.txt && \
-    if [ $? -ne 0 ]; then \
+    if ! awk '/^python[[:space:]]/ {print $1, $2}' /tmp/mamba_list_python.txt > /tmp/awk_python.txt; then \
         echo "Failed to extract python packages with awk"; \
         exit 1; \
     fi && \
     echo "Extracted python packages successfully" && \
     # Write to pinned file
-    cat /tmp/awk_python.txt >> "${CONDA_DIR}/conda-meta/pinned" && \
-    if [ $? -ne 0 ]; then \
+    if ! cat /tmp/awk_python.txt >> "${CONDA_DIR}/conda-meta/pinned"; then \
         echo "Failed to write to ${CONDA_DIR}/conda-meta/pinned"; \
         exit 1; \
     fi && \
     echo "Wrote Python version to ${CONDA_DIR}/conda-meta/pinned successfully" && \
-    mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    if [ $? -ne 0 ]; then \
+    if ! mamba clean --all -f -y; then \
+        echo "Failed to clean mamba"; \
+        exit 1; \
+    fi && \
+    if ! fix-permissions "${CONDA_DIR}"; then \
         echo "Failed to fix permissions for ${CONDA_DIR}"; \
         exit 1; \
     fi && \
     echo "Fixed permissions for ${CONDA_DIR} successfully" && \
-    fix-permissions "/home/${NB_USER}" && \
-    if [ $? -ne 0 ]; then \
+    if ! fix-permissions "/home/${NB_USER}"; then \
         echo "Failed to fix permissions for /home/${NB_USER}"; \
         exit 1; \
     fi && \
@@ -175,31 +170,31 @@ RUN rm /tmp/run-one_1.17.orig.tar.gz
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get -o Acquire::Check-Valid-Until=false update --yes && \
     apt-get install --yes --no-install-recommends \
-        fonts-liberation \
+        fonts-liberation=1:1.07.4-11 \
         # - pandoc is used to convert notebooks to html files
         #   it's not present in arch64 ubuntu image, so we install it here
-        pandoc \
+        pandoc=2.9.2.1-1+deb11u1 \
         # Common useful utilities
-        curl \
-        iputils-ping \
-        traceroute \
-        git \
-        nano-tiny \
-        tzdata \
-        unzip \
-        vim-tiny \
+        curl=7.74.0-1.3+deb11u14 \
+        iputils-ping=3:20210202-1 \
+        traceroute=1:2.1.0-2+deb11u1 \
+        git=1:2.30.2-1+deb11u2 \
+        nano-tiny=5.4-2+deb11u3 \
+        tzdata=2024b-0+deb11u1 \
+        unzip=6.0-26+deb11u1 \
+        vim-tiny=2:8.2.2434-3+deb11u1 \
         # git-over-ssh
-        openssh-client \
+        openssh-client=1:8.4p1-5+deb11u3 \
         # less is needed to run help in R
         # see: https://github.com/jupyter/docker-stacks/issues/1588
-        less \ 
+        less=551-2+deb11u2 \
         # nbconvert dependencies
         # https://nbconvert.readthedocs.io/en/latest/install.html#installing-tex
-        texlive-xetex \
-        texlive-fonts-recommended \
-        texlive-plain-generic \
+        texlive-xetex=2020.20210202-3 \
+        texlive-fonts-recommended=2020.20210202-3 \
+        texlive-plain-generic=2020.20210202-3 \
         # Enable clipboard on Linux host systems
-        xclip && \
+        xclip=0.13-2 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Jupyter Notebook, Lab, and Hub
