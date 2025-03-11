@@ -14,12 +14,12 @@ USER root
 # Install all OS dependencies for notebook server that starts but lacks all features (e.g., download as all possible file formats)
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    bzip2=1.0.8-6 \
-    locales=2.39-0ubuntu8.4 \
-    sudo=1.9.15p5-3ubuntu5 \
-    tini=0.18.0-1 \
-    wget=1.21.4-1ubuntu4.1 \
-    ca-certificates=20240203 && \
+    bzip2=1.0.8-4 \
+    locales=2.31-13+deb11u11 \
+    sudo=1.9.5p2-3+deb11u1 \
+    tini=0.19.0-1 \
+    wget=1.21-1+deb11u1 \
+    ca-certificates=20210119 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
