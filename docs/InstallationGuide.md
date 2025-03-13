@@ -49,7 +49,7 @@ roleRef:
 The prerequisites are as follows:
 
 | **Name**   | **Requirement** | **Version** |
-|------------|-----------------|-------------|
+| ---------- | --------------- | ----------- |
 | Kubernetes | Mandatory       | 1.21+       |
 
 ## Deployment
@@ -60,7 +60,7 @@ You may need to deploy the following Helm parameters during Environment checker 
 are described in the following table.
 
 | **Parameter**                        | **Required (Mandatory\Optional)** | **Default value**                                | **Value Example**                                                  | **Description**                                                                                                                                                                                       |
-|--------------------------------------|-----------------------------------|--------------------------------------------------|--------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------ | --------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CLOUD_PUBLIC_HOST                    | M                                 | -                                                | k8s-apps10.k8s.sdntest.qubership.org                               | The public host is specified to create some Kubernetes elements, such as Ingress in env-checker.                                                                                                      |
 | CHOWN_HOME                           | O (M for Openshift)               | -                                                | - / yes (for Openshift). possible values: 'yes' or 'no'            | enables home directory ownership change during container deploy                                                                                                                                       |
 | CHOWN_HOME_OPTS                      | O (M for Openshift)               | -                                                | - / '-R' (for Openshift). possible values: - / '-R'                | sets CHOWN_HOME mode to recursive                                                                                                                                                                     |
