@@ -44,5 +44,4 @@ spec:
         nodeSelector:
           {{ toYaml . | nindent 10 }}
         {{ end }}
-
 {{- end }}

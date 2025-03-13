@@ -161,11 +161,13 @@ WORKDIR "${HOME}"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Download run-one file and upload to /tmp
-RUN wget --progress=dot:giga -O /tmp/run-one_1.17.orig.tar.gz http://security.ubuntu.com/ubuntu/pool/main/r/run-one/run-one_1.17.orig.tar.gz
 # Unpack the file to /opt
-RUN tar --directory=/opt -xvf /tmp/run-one_1.17.orig.tar.gz
 # delete temp files
-RUN rm /tmp/run-one_1.17.orig.tar.gz
+# install opentelemetry exporter
+RUN wget --progress=dot:giga -O /tmp/run-one_1.17.orig.tar.gz http://security.ubuntu.com/ubuntu/pool/main/r/run-one/run-one_1.17.orig.tar.gz && \
+    tar --directory=/opt -xvf /tmp/run-one_1.17.orig.tar.gz && \
+    rm /tmp/run-one_1.17.orig.tar.gz && \
+    pip install --no-cache-dir opentelemetry-exporter-prometheus-remote-write==0.51b0
 
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get -o Acquire::Check-Valid-Until=false update --yes && \
@@ -258,7 +260,7 @@ WORKDIR "${HOME}"
 #    jupyter labextension disable --level=system "@jupyterlab/apputils-extension:announcements"
 
 # Download and install kubectl
-RUN wget -O kubectl-v1.32 https://dl.k8s.io/v1.32.0/bin/linux/amd64/kubectl && \
+RUN wget --progress=dot:giga -O kubectl-v1.32 https://dl.k8s.io/v1.32.0/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl-v1.32 && \
     mv ./kubectl-v1.32 /usr/local/bin/ && \
     ln -s /usr/local/bin/kubectl-v1.32 /usr/local/bin/kubectl
@@ -337,7 +339,6 @@ RUN mamba install --yes \
     fix-permissions "/home/${NB_USER}/"
 
 RUN echo "export PATH=/opt/conda/bin:\$PATH" >> /home/jovyan/.bashrc
-RUN pip install --no-cache-dir opentelemetry-exporter-prometheus-remote-write==0.51b0
 RUN chgrp -Rf root /home/$NB_USER && chmod -Rf g+w /home/$NB_USER
 
 # Switch back to jovyan to avoid accidental container runs as root

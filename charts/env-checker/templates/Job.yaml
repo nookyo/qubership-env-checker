@@ -1,4 +1,3 @@
-#Creation in Job mode
 {{- if .Values.ENVIRONMENT_CHECKER_JOB_COMMAND }}
 kind: Job
 apiVersion: batch/v1
