@@ -1,2 +1,2 @@
 exclude:
-    - charts/env-checker/templates/*
+  - charts/env-checker/templates/*

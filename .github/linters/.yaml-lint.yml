@@ -53,7 +53,6 @@ rules:
     max-spaces-after: 1
   indentation:
     spaces: 2
-    indent-sequences: false
     check-multi-line-strings: false
   key-duplicates: enable
   line-length: disable
