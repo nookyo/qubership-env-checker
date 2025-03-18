@@ -45,7 +45,7 @@ if "GEN_CERT" in os.environ:
     # Generate an openssl.cnf file to set the distinguished name
     cnf_file = os.path.join(os.getenv("CONDA_DIR", "/usr/lib"), "ssl", "openssl.cnf")
     if not os.path.isfile(cnf_file):
-        with open(cnf_file, "w", encoding="utf-8") as fh:  # Указана кодировка
+        with open(cnf_file, "w", encoding="utf-8") as fh:
             fh.write(OPENSSL_CONFIG)
 
     # Generate a certificate if one doesn't exist on disk
