@@ -36,9 +36,6 @@ jobs:
             grep "\S" ./.github/super-linter.env | grep -v "^#" >> $GITHUB_ENV
           fi
 
-      - name: Make scripts executable
-        run: chmod +x ./installation/shells/*.sh
-
       - name: Lint Code Base
         uses: super-linter/super-linter@v7
         env:
