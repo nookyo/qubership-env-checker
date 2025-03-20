@@ -37,7 +37,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: env-checker-sa # <--- env-checker service account
-    namespace: { { .Values.NAMESPACE } } # <--- fill current namespace
+    namespace: {{ .Release.Namespace }} # <--- fill current namespace
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -90,7 +90,7 @@ to
 
 ```yaml
 clusters:
-server: https://kubernetes.default.svc.cluster.local:443
+  server: https://kubernetes.default.svc.cluster.local:443
 ```
 
 ### Deployment Parameters

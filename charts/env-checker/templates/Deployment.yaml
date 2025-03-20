@@ -8,7 +8,7 @@ metadata:
     application: '{{ .Values.APPLICATION_NAME }}'
     app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
     app.kubernetes.io/component: backend
-    app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Values.NAMESPACE | nospace | trunc 63 }}'
+    app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Release.Namespace | nospace | trunc 63 }}'
     app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
     app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
     app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
@@ -47,7 +47,7 @@ spec:
         application: '{{ .Values.APPLICATION_NAME }}'
         app.kubernetes.io/name: '{{ .Values.SERVICE_NAME }}'
         app.kubernetes.io/component: backend
-        app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Values.NAMESPACE | nospace | trunc 63 }}'
+        app.kubernetes.io/instance: '{{ cat .Values.SERVICE_NAME .Values.DELIMITER .Release.Namespace | nospace | trunc 63 }}'
         app.kubernetes.io/version: '{{ .Values.ARTIFACT_DESCRIPTOR_VERSION }}'
         app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
         app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'

@@ -3,7 +3,7 @@
 - name: "CLOUD_NAME"
   value: '{{ .Values.CLOUD_NAME }}'
 - name: "NAMESPACE"
-  value: '{{ .Values.NAMESPACE }}'
+  value: '{{ .Release.Namespace }}'
 - name: "PRODUCTION_MODE"
   value: '{{ .Values.PRODUCTION_MODE }}'
 - name: "ENVIRONMENT_CHECKER_UI_ACCESS_TOKEN"
