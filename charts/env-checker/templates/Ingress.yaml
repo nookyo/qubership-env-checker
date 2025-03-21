@@ -4,8 +4,8 @@ kind: Ingress
 metadata:
   annotations:
     {{- if .Values.OPS_IDP_URL }}
-    nginx.ingress.kubernetes.io/auth-signin: https://{{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/start?rd=https://$host$request_uri$is_args$args
-    nginx.ingress.kubernetes.io/auth-url: https://{{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://{{ .Values.SERVICE_NAME }}-{{ .Release.Namespace }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/start?rd=https://$host$request_uri$is_args$args
+    nginx.ingress.kubernetes.io/auth-url: https://{{ .Values.SERVICE_NAME }}-{{ .Release.Namespace }}.{{ .Values.CLOUD_PUBLIC_HOST }}/oauth2/auth
     nginx.ingress.kubernetes.io/configuration-snippet: |
       auth_request_set $token $upstream_http_authorization;
       proxy_set_header Authorization $token;
@@ -20,13 +20,13 @@ metadata:
     app.kubernetes.io/part-of: '{{ .Values.APPLICATION_NAME }}'
     app.kubernetes.io/managed-by: '{{ .Values.MANAGED_BY }}'
   name: {{ .Values.SERVICE_NAME }}
-  namespace: {{ .Values.NAMESPACE }}
+  namespace: {{ .Release.Namespace }}
 spec:
   {{- if .Values.OPS_IDP_URL }}
   ingressClassName: nginx
   {{- end }}
   rules:
-    - host: {{ .Values.SERVICE_NAME }}-{{ .Values.NAMESPACE }}.{{ .Values.CLOUD_PUBLIC_HOST }}
+    - host: {{ .Values.SERVICE_NAME }}-{{ .Release.Namespace }}.{{ .Values.CLOUD_PUBLIC_HOST }}
       http:
         paths:
           - backend:

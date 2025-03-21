@@ -2,6 +2,12 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+# PYTHON_MYPY and PYTHON_PYLINT was disabled because linter require to specify an import for the get_config
+# function, but in the case of creating a jupyterhub server, this is an auto-generated value
+# more info here: https://github.com/jupyterhub/jupyterhub/issues/4850#issuecomment-2283971306
+# pylint: skip-file
+# mypy: ignore-errors
+
 """
 Jupyter server settings.
 """
@@ -12,7 +18,6 @@ import stat
 import subprocess
 
 from jupyter_core.paths import jupyter_data_dir
-from jupyter_server import get_config
 
 c = get_config()  # noqa: F821
 c.ServerApp.ip = "0.0.0.0"
@@ -66,8 +71,7 @@ if "GEN_CERT" in os.environ:
 
     # Restrict access to the file
     os.chmod(pem_file, stat.S_IRUSR | stat.S_IWUSR)
-
-c.ServerApp.certfile = pem_file
+    c.ServerApp.certfile = pem_file
 
 # Change default umask for all subprocesses of the notebook server if set in
 # the environment

@@ -37,7 +37,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: env-checker-sa # <--- env-checker service account
-    namespace: { { .Values.NAMESPACE } } # <--- fill current namespace
+    namespace: {{ .Release.Namespace }} # <--- fill current namespace
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -53,6 +53,45 @@ The prerequisites are as follows:
 | Kubernetes | Mandatory       | 1.21+       |
 
 ## Deployment
+
+### Local deployment
+
+To quickly get started in a local Kubernetes environment, execute the following Helm command:
+
+```bash
+helm upgrade --install qubership-env-checker \
+    --namespace=env-checker \
+    --create-namespace \
+    --set NAMESPACE=env-checker \
+    charts/env-checker
+```
+
+Next, to access the UI of the env-checker service, you can either use port-forwarding:
+
+```yaml
+kubectl port-forward svc/env-checker 8080:8888 &
+```
+
+Or access it via Ingress. For Windows, you need to add the Ingress value to your hosts file:
+
+```yaml
+127.0.0.1         env-checker-env-checker.qubership
+```
+
+If you encounter issues executing kubectl commands, follow these steps:
+
+Add your cluster's /.kube/config file to any directory within the env-checker pods. Change the value in the added configuration:
+```yaml
+clusters:
+  server: https://127.0.0.1:6443
+```
+
+to
+
+```yaml
+clusters:
+  server: https://kubernetes.default.svc.cluster.local:443
+```
 
 ### Deployment Parameters
 
