@@ -2,6 +2,12 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+# PYTHON_MYPY and PYTHON_PYLINT was disabled because linter require to specify an import for the get_config
+# function, but in the case of creating a jupyterhub server, this is an auto-generated value
+# more info here: https://github.com/jupyterhub/jupyterhub/issues/4850#issuecomment-2283971306
+# pylint: skip-file
+# mypy: ignore-errors
+
 """
 Jupyter server settings.
 """
