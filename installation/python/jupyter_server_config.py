@@ -12,7 +12,6 @@ import stat
 import subprocess
 
 from jupyter_core.paths import jupyter_data_dir
-from jupyter_server import get_config
 
 c = get_config()  # noqa: F821
 c.ServerApp.ip = "0.0.0.0"
@@ -66,8 +65,7 @@ if "GEN_CERT" in os.environ:
 
     # Restrict access to the file
     os.chmod(pem_file, stat.S_IRUSR | stat.S_IWUSR)
-
-c.ServerApp.certfile = pem_file
+    c.ServerApp.certfile = pem_file
 
 # Change default umask for all subprocesses of the notebook server if set in
 # the environment
