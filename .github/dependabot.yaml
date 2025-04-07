@@ -7,7 +7,6 @@ updates:
   - package-ecosystem: "docker"
     directories:
     - "/"
-    - "/docker"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 20
