@@ -1,0 +1,5 @@
+linters:
+  yaml:
+    disable: true
+    exclude:
+      - .github/workflows/automatic-pr-labeler.yaml
