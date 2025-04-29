@@ -166,8 +166,11 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # install opentelemetry exporter
 RUN wget --progress=dot:giga -O /tmp/run-one_1.17.orig.tar.gz http://security.ubuntu.com/ubuntu/pool/main/r/run-one/run-one_1.17.orig.tar.gz && \
     tar --directory=/opt -xvf /tmp/run-one_1.17.orig.tar.gz && \
-    rm /tmp/run-one_1.17.orig.tar.gz && \
-    pip install --no-cache-dir opentelemetry-exporter-prometheus-remote-write==0.51b0
+    rm /tmp/run-one_1.17.orig.tar.gz
+
+RUN pip install --no-cache-dir \
+    opentelemetry-exporter-prometheus-remote-write==0.51b0 \
+    redis==5.2.1
 
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get -o Acquire::Check-Valid-Until=false update --yes && \
@@ -182,9 +185,9 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update --yes && \
         traceroute=1:2.1.0-2+deb11u1 \
         git=1:2.30.2-1+deb11u2 \
         nano-tiny=5.4-2+deb11u3 \
-        tzdata=2024b-0+deb11u1 \
+        tzdata=2025b-0+deb11u1 \
         unzip=6.0-26+deb11u1 \
-        vim-tiny=2:8.2.2434-3+deb11u1 \
+        vim-tiny=2:8.2.2434-3+deb11u3 \
         # git-over-ssh
         openssh-client=1:8.4p1-5+deb11u3 \
         # less is needed to run help in R
@@ -279,61 +282,60 @@ RUN wget --progress=dot:giga https://github.com/mikefarah/yq/releases/download/v
 
 # Install additional packages
 RUN mamba install --yes \
-    'yaml' \
-    'xlrd' \
-    'altair' \
-    'beautifulsoup4' \
-    'bokeh' \
-    'bottleneck' \
-    'cloudpickle' \
-    'blas' \
     'aiohttp>=3.9.2' \
     'aiosmtplib' \
+    'altair' \
+    'beautifulsoup4' \
+    'blas' \
+    'bokeh' \
+    'boto3' \
+    'bottleneck' \
+    'cassandra-driver' \
+    'clickhouse-driver' \
+    'cloudpickle' \
     'cython' \
     'dask' \
     'dill' \
     'fonttools>=4.43.0' \
-    'urllib3>=2.0.6' \
-    'pyarrow>=14.0.1' \
-    'pillow>=10.2.0' \
     'h5py' \
-    'prettytable' \
-    'papermill' \
     'ipympl' \
     'ipywidgets' \
     'jupyter_server>=2.0.0' \
+    'kafka-python' \
     'matplotlib-base' \
     'numba' \
     'numexpr' \
+    'opentelemetry-api' \
+    'opentelemetry-sdk' \
+    'opentelemetry-semantic-conventions' \
     'openpyxl' \
     'pandas' \
+    'papermill' \
     'patsy' \
+    'pika' \
+    'pillow>=10.2.0' \
+    'prettytable' \
     'protobuf' \
+    'psycopg2' \
+    'pyarrow>=14.0.1' \
+    'pymongo' \
+    'pypdf2' \
     'pytables' \
+    'python-kubernetes' \
+    'python-snappy' \
     'scikit-image' \
     'scikit-learn' \
     'scipy' \
+    'scrapbook' \
     'seaborn' \
     'sqlalchemy' \
     'statsmodels' \
     'sympy' \
+    'urllib3>=2.0.6' \
     'widgetsnbextension' \
-    'python-kubernetes' \
-    'papermill' \
-    'scrapbook' \
-    'pymongo' \
-    'pypdf2' \
-    'pika' \
-    'psycopg2' \
-    'kafka-python' \
-    'cassandra-driver' \
-    'clickhouse-driver' \
+    'xlrd' \
     'xlsxwriter' \
-    'python-snappy' \
-    'opentelemetry-sdk' \
-    'opentelemetry-semantic-conventions' \
-    'opentelemetry-api' \
-    'boto3' && \
+    'yaml' && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}/"
@@ -346,3 +348,6 @@ USER ${NB_UID}
 
 # Add R mimetype option to specify how the plot returns from R to the browser
 COPY --chown=${NB_UID}:${NB_GID} installation/Rprofile.site /opt/conda/lib/R/etc/
+
+# Disable notifications for update Juputer Lab
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
