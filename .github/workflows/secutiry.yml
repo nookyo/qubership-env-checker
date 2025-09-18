@@ -19,7 +19,7 @@ on:
       filter_strict:
         description: "Filter SARIF to only HIGH+CRITICAL"
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
