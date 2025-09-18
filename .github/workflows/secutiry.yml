@@ -12,7 +12,7 @@ on:
         options:
           - docker
           - source
-          - both (docker+source)
+          - both
       image:
         description: "Docker image (for docker/both). By default ghcr.io/<owner>/<repo>:latest"
         required: false
