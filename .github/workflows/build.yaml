@@ -61,6 +61,6 @@ jobs:
           context: ${{ matrix.component.context }}
           file: ${{ matrix.component.file }}
           platforms: linux/amd64
-          push: ${{ github.repository_owner == 'Netcracker' }}
-          tags: ghcr.io/netcracker/${{ matrix.component.name }}:${{ steps.tag.outputs.tag }}
+          push: ${{ github.repository_owner == 'nookyo' }}
+          tags: ghcr.io/nookyo/${{ matrix.component.name }}:${{ steps.tag.outputs.tag }}
           provenance: false
