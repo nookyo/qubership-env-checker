@@ -50,38 +50,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Grype scan (High+Critical, JSON)
+      # Grype
+      - name: "Grype scan (Docker: High+Critical)"
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        id: grype-docker
         uses: anchore/scan-action@v6
         with:
           image: "${{ steps.vars.outputs.image }}"
           fail-build: false
           severity-cutoff: critical
-          output-format: json
-          output-file: grype-docker.json
+          output-file: "grype-docker.sarif"
 
-      - name: Upload scan artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload SARIF report to GitHub Security
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        id: scan
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: grype-report
-          path: grype-docker.json
-          if-no-files-found: error
-      # # Grype
-      # - name: "Grype scan (Docker: High+Critical)"
-      #   if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
-      #   id: grype-docker
-      #   uses: anchore/scan-action@v6
-      #   with:
-      #     image: "${{ steps.vars.outputs.image }}"
-      #     fail-build: false
-      #     severity-cutoff: high
-      #     output-file: "grype-docker.sarif"
-
-      # - name: Upload SARIF report to GitHub Security
-      #   if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
-      #   id: scan
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: ${{ steps.grype-docker.outputs.sarif }}
+          sarif_file: ${{ steps.grype-docker.outputs.sarif }}
 
 #    - name: Scan image with Anchore/Grype
 #         uses: anchore/scan-action@v3
