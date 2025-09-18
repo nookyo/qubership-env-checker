@@ -45,7 +45,7 @@ jobs:
             echo "image=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
           fi
 
-      - name: Show plan
+      - name: Scan plan
         run: |
           echo "Mode: ${{ github.event.inputs.target }}"
           echo "Image (if docker/both): ${{ steps.vars.outputs.image }}"
