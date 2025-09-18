@@ -12,7 +12,6 @@ on:
         options:
           - docker
           - source
-          - both
       image:
         description: "Docker image (for docker/both). By default ghcr.io/<owner>/<repo>:latest"
         required: false
@@ -70,7 +69,7 @@ jobs:
       # -----------------------------
       # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
-        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'docker'}}
         id: grype-docker
         uses: anchore/scan-action@v7
         with:
@@ -81,13 +80,13 @@ jobs:
           output-file: grype-docker.sarif
 
       - name: Filter Grype Docker SARIF
-        if: ${{ (github.event.inputs.target == 'docker' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
+        if: ${{ (github.event.inputs.target == 'docker') && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-docker.sarif > grype-docker.filtered.sarif
           mv grype-docker.filtered.sarif grype-docker.sarif
 
       - name: Upload Grype Docker SARIF
-        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'docker'}}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: grype-docker.sarif
@@ -95,7 +94,7 @@ jobs:
       # -----------------------------
       # Grype Source
       - name: "Grype scan (Source: High+Critical)"
-        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'source'}}
         id: grype-source
         uses: anchore/scan-action@v7
         with:
@@ -107,13 +106,13 @@ jobs:
         continue-on-error: true
 
       - name: Filter Grype Source SARIF
-        if: ${{ (github.event.inputs.target == 'source' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
+        if: ${{ (github.event.inputs.target == 'source') && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-source.sarif > grype-source.filtered.sarif
           mv grype-source.filtered.sarif grype-source.sarif
 
       - name: Upload Grype Source SARIF
-        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'source' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: grype-source.sarif
@@ -121,7 +120,7 @@ jobs:
       # -----------------------------
       # Trivy Docker
       - name: "Trivy scan (Docker: CRITICAL,HIGH)"
-        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'docker' }}
         id: trivy-docker
         uses: aquasecurity/trivy-action@0.16.0
         with:
@@ -133,13 +132,13 @@ jobs:
         continue-on-error: true
 
       - name: Filter Trivy Docker SARIF
-        if: ${{ (github.event.inputs.target == 'docker' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
+        if: ${{ (github.event.inputs.target == 'docker') && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-docker.sarif > trivy-docker.filtered.sarif
           mv trivy-docker.filtered.sarif trivy-docker.sarif
 
       - name: Upload Trivy Docker SARIF
-        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'docker' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-docker.sarif
@@ -147,7 +146,7 @@ jobs:
       # -----------------------------
       # Trivy Source
       - name: "Trivy scan (Source: CRITICAL,HIGH)"
-        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'source' }}
         id: trivy-source
         uses: aquasecurity/trivy-action@0.16.0
         with:
@@ -166,7 +165,7 @@ jobs:
           mv trivy-source.filtered.sarif trivy-source.sarif
 
       - name: Upload Trivy Source SARIF
-        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        if: ${{ github.event.inputs.target == 'source' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-source.sarif
