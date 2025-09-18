@@ -48,6 +48,16 @@ jobs:
           echo "Mode: ${{ github.event.inputs.target }}"
           echo "Image (if docker/both): ${{ steps.vars.outputs.image }}"
           echo "Filter strict: ${{ github.event.inputs.filter_strict }}"
+          if [ "${{ github.event.inputs.target }}" = "docker" ] || [ "${{ github.event.inputs.target }}" = "both" ]; then
+            echo "   - Docker scan: enabled"
+          else
+            echo "   - Docker scan: skipped"
+          fi
+          if [ "${{ github.event.inputs.target }}" = "source" ] || [ "${{ github.event.inputs.target }}" = "both" ]; then
+            echo "   - Source scan: enabled"
+          else
+            echo "   - Source scan: skipped"
+          fi
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
