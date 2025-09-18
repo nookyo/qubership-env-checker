@@ -1,4 +1,6 @@
 name: On-demand Security Scan (Grype + Trivy)
+run-name: "Security Scan [${{ github.event.inputs.target }}] by @${{ github.actor }} #${{ github.run_number }}"
+
 
 on:
   workflow_dispatch:
