@@ -50,105 +50,105 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Grype
+      # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
         if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
         id: grype-docker
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: "${{ steps.vars.outputs.image }}"
           fail-build: false
-          severity-cutoff: critical
-          output-file: "grype-docker.sarif"
+          severity-cutoff: high
+          output-format: sarif
+          output-file: grype-docker.sarif
 
-      - name: Upload SARIF report to GitHub Security
+      - name: Upload Grype Docker SARIF
         if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
-        id: scan
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.grype-docker.outputs.sarif }}
 
-#    - name: Scan image with Anchore/Grype
-#         uses: anchore/scan-action@v3
-#         with:
-#           image: "ghcr.io/netcracker/${{ matrix.component.name }}:${{ steps.tag.outputs.tag }}"
-#           fail-build: true
-#           severity-cutoff: critical, high, medium
-#           output-format: sarif
+      # Grype Source
+      - name: "Grype scan (Source: High+Critical)"
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        id: grype-source
+        uses: anchore/scan-action@v7
+        with:
+          path: .
+          fail-build: false
+          severity-cutoff: high
+          output-format: sarif
+          output-file: grype-source.sarif
+        continue-on-error: true
 
-#       - name: Upload SARIF report to GitHub Security
-#         uses: github/codeql-action/upload-sarif@v3
-#         with:
-#           sarif_file: results.sarif
+      - name: Upload Grype Source SARIF
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype-source.outputs.sarif }}
 
+      # Trivy Docker
+      - name: "Trivy scan (Docker: CRITICAL,HIGH)"
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        id: trivy-docker
+        uses: aquasecurity/trivy-action@0.16.0
+        with:
+          image-ref: "${{ steps.vars.outputs.image }}"
+          format: "sarif"
+          output: trivy-docker.sarif
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"
+        continue-on-error: true
 
-    #   - name: "Grype scan (Source: High+Critical)"
-    #     if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
-    #     id: grype-source
-    #     uses: anchore/scan-action@v7
-    #     with:
-    #       path: .
-    #       fail-build: false
-    #       severity-cutoff: high
-    #       output-format: sarif
-    #       output-file: "grype-source.sarif"
-    #     continue-on-error: true
+      - name: Upload Trivy Docker SARIF
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-docker.sarif
 
-    #   # Trivy
-    #   - name: "Trivy scan (Docker: CRITICAL,HIGH)"
-    #     if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
-    #     id: trivy-docker
-    #     uses: aquasecurity/trivy-action@0.16.0
-    #     with:
-    #       image-ref: "${{ steps.vars.outputs.image }}"
-    #       format: "sarif"
-    #       output: "trivy-docker.sarif"
-    #       severity: "CRITICAL,HIGH"
-    #       exit-code: "0"
-    #     continue-on-error: true
+      # Trivy Source
+      - name: "Trivy scan (Source: CRITICAL,HIGH)"
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        id: trivy-source
+        uses: aquasecurity/trivy-action@0.16.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: trivy-source.sarif
+          severity: "CRITICAL,HIGH"
+          exit-code: "0"
+        continue-on-error: true
 
-    #   - name: "Trivy scan (Source: CRITICAL,HIGH)"
-    #     if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
-    #     id: trivy-source
-    #     uses: aquasecurity/trivy-action@0.16.0
-    #     with:
-    #       ignore-unfixed: true
-    #       scan-type: "fs"
-    #       format: "sarif"
-    #       output: "trivy-source.sarif"
-    #       severity: "CRITICAL,HIGH"
-    #       exit-code: "0"
-    #     continue-on-error: true
+      - name: Upload Trivy Source SARIF
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-source.sarif
 
-      # - name: Upload SARIF results
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: results.sarif
-
-      # - name: Upload scan artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: scan-reports-${{ github.event.inputs.target }}
-      #     path: |
-      #       grype-docker.sarif
-      #       grype-source.sarif
-      #       trivy-docker.sarif
-      #       trivy-source.sarif
-      #     if-no-files-found: ignore
+      # Collect all reports as artifact (wildcard)
+      - name: Upload all scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-reports-${{ github.event.inputs.target }}
+          path: "**/*.sarif"
+          if-no-files-found: ignore
 
       # Fail only at the end if issues found
-    #   - name: Fail if vulnerabilities were found
-    #     if: always()
-    #     run: |
-    #       echo "Checking scan results..."
-    #       FAILED=false
-    #       if [[ "${{ steps.grype-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
-    #       if [[ "${{ steps.grype-source.outcome }}" == "failure" ]]; then FAILED=true; fi
-    #       if [[ "${{ steps.trivy-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
-    #       if [[ "${{ steps.trivy-source.outcome }}" == "failure" ]]; then FAILED=true; fi
-    #       if [ "$FAILED" = "true" ]; then
-    #         echo "❌ Vulnerabilities found!"
-    #         exit 1
-    #       else
-    #         echo "✅ No blocking vulnerabilities found."
-    #       fi
+      - name: Fail if vulnerabilities were found
+        if: always()
+        run: |
+          echo "Checking scan results..."
+          FAILED=false
+          if [[ "${{ steps.grype-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
+          if [[ "${{ steps.grype-source.outcome }}" == "failure" ]]; then FAILED=true; fi
+          if [[ "${{ steps.trivy-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
+          if [[ "${{ steps.trivy-source.outcome }}" == "failure" ]]; then FAILED=true; fi
+
+          if [ "$FAILED" = "true" ]; then
+            echo "❌ Vulnerabilities found!"
+            exit 1
+          else
+            echo "✅ No blocking vulnerabilities found."
+          fi
