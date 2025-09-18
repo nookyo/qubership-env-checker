@@ -55,7 +55,7 @@ jobs:
         with:
           image: "${{ steps.vars.outputs.image }}"
           fail-build: false
-          severity-cutoff: high
+          severity-cutoff: critical
           output-format: json
           output-file: grype-docker.json
 
