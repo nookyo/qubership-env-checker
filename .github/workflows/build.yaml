@@ -13,6 +13,10 @@ on:
       postfix:
         description: 'Postfix for tag name'
         required: false
+permissions:
+  contents: read
+  packages: write
+  id-token: write
 
 env:
   RAW_TAG_NAME: ${{ github.event.release.tag_name != '' && github.event.release.tag_name || github.ref_name }}
