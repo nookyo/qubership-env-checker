@@ -86,6 +86,12 @@ jobs:
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-docker.sarif > grype-docker.filtered.sarif
           mv grype-docker.filtered.sarif grype-docker.sarif
 
+      - name: Upload Grype Docker SARIF
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype-docker.sarif
+
       # -----------------------------
       # Grype Source
       - name: "Grype scan (Source: High+Critical)"
@@ -106,6 +112,12 @@ jobs:
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-source.sarif > grype-source.filtered.sarif
           mv grype-source.filtered.sarif grype-source.sarif
 
+      - name: Upload Grype Source SARIF
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype-source.sarif
+
       # -----------------------------
       # Trivy Docker
       - name: "Trivy scan (Docker: CRITICAL,HIGH)"
@@ -125,6 +137,12 @@ jobs:
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-docker.sarif > trivy-docker.filtered.sarif
           mv trivy-docker.filtered.sarif trivy-docker.sarif
+
+      - name: Upload Trivy Docker SARIF
+        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-docker.sarif
 
       # -----------------------------
       # Trivy Source
@@ -147,10 +165,11 @@ jobs:
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-source.sarif > trivy-source.filtered.sarif
           mv trivy-source.filtered.sarif trivy-source.sarif
 
-      - name: Upload SARIFs (all) files
+      - name: Upload Trivy Source SARIF
+        if: ${{ github.event.inputs.target == 'source' || github.event.inputs.target == 'both' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: "."
+          sarif_file: trivy-source.sarif
 
       # -----------------------------
       # Collect all reports
