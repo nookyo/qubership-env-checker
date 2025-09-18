@@ -25,7 +25,7 @@ env:
 jobs:
   multiplatform_build:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         component:
           - name: qubership-env-checker
@@ -43,7 +43,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${GITHUB_ACTOR}
+          username: ${{ github.actor }}
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Compute image tag
         id: tag
@@ -65,6 +65,6 @@ jobs:
           context: ${{ matrix.component.context }}
           file: ${{ matrix.component.file }}
           platforms: linux/amd64
-          push: ${{ github.repository_owner == 'nookyo' }}
+          push: true
           tags: ghcr.io/nookyo/${{ matrix.component.name }}:${{ steps.tag.outputs.tag }}
           provenance: false
