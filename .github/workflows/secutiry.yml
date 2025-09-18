@@ -75,11 +75,11 @@ jobs:
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-docker.sarif > grype-docker.filtered.sarif
           mv grype-docker.filtered.sarif grype-docker.sarif
 
-      - name: Upload Grype Docker SARIF
-        if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: grype-docker.sarif
+      # - name: Upload Grype Docker SARIF
+      #   if: ${{ github.event.inputs.target == 'docker' || github.event.inputs.target == 'both' }}
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: grype-docker.sarif
 
       # -----------------------------
       # Grype Source
