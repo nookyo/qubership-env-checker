@@ -86,7 +86,7 @@ jobs:
           output-file: grype-docker.sarif
 
       - name: Filter Grype Docker SARIF
-        if: ${{ (github.event.inputs.target == 'docker') && github.event.inputs.filter_strict }}
+        if: ${{ github.event.inputs.target == 'docker' && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-docker.sarif > grype-docker.filtered.sarif
           mv grype-docker.filtered.sarif grype-docker.sarif
@@ -111,7 +111,7 @@ jobs:
         continue-on-error: true
 
       - name: Filter Grype Source SARIF
-        if: ${{ (github.event.inputs.target == 'source') && github.event.inputs.filter_strict }}
+        if: ${{ github.event.inputs.target == 'source' && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' grype-source.sarif > grype-source.filtered.sarif
           mv grype-source.filtered.sarif grype-source.sarif
@@ -143,7 +143,7 @@ jobs:
         continue-on-error: true
 
       - name: Filter Trivy Docker SARIF
-        if: ${{ (github.event.inputs.target == 'docker') && github.event.inputs.filter_strict }}
+        if: ${{ github.event.inputs.target == 'docker' && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-docker.sarif > trivy-docker.filtered.sarif
           mv trivy-docker.filtered.sarif trivy-docker.sarif
@@ -169,7 +169,7 @@ jobs:
         continue-on-error: true
 
       - name: Filter Trivy Source SARIF
-        if: ${{ (github.event.inputs.target == 'source' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
+        if: ${{ github.event.inputs.target == 'source'  && github.event.inputs.filter_strict }}
         run: |
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-source.sarif > trivy-source.filtered.sarif
           mv trivy-source.filtered.sarif trivy-source.sarif
