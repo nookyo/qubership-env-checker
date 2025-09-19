@@ -96,6 +96,7 @@ jobs:
             FILE_NAME="grype-source"
           fi
           echo "file_name=$FILE_NAME" >> "$GITHUB_OUTPUT"
+           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
 
           echo "SARIF file name set to: $FILE_NAME"
           echo  ${{ env.FILE_NAME }}.filtered.sarif
