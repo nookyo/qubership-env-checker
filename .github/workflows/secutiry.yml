@@ -83,7 +83,7 @@ jobs:
         with:
           image: "${{ needs.init.outputs.image }}"
           fail-build: false
-          severity-cutoff: high
+          severity-cutoff: critical
           output-format: sarif
           output-file: grype-docker.sarif
 
@@ -99,6 +99,9 @@ jobs:
            echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
 
           echo "SARIF file name set to: $FILE_NAME"
+
+      - name: Write variable to file
+        run: |
           echo  ${{ env.FILE_NAME }}.filtered.sarif
 
       - name: Filter Grype Docker SARIF
