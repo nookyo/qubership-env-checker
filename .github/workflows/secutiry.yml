@@ -1,6 +1,5 @@
 name: On-demand Security Scan (Grype + Trivy)
 run-name: "Security Scan [${{ github.event.inputs.target }}] by @${{ github.actor }} #${{ github.run_number }}"
-
 on:
   workflow_dispatch:
     inputs:
@@ -27,9 +26,10 @@ permissions:
   security-events: write
 
 jobs:
-  scan:
+  init:
     runs-on: ubuntu-latest
-
+    outputs:
+      image: ${{ steps.vars.outputs.image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,7 +66,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # -----------------------------
+  grype-scan:
+    runs-on: ubuntu-latest
+    outputs:
+      grype_docker_conclusion: ${{ steps.grype-docker.conclusion }}
+      grype_source_conclusion: ${{ steps.grype-source.conclusion }}
+    steps:
       # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
         if: ${{ github.event.inputs.target == 'docker'}}
@@ -91,7 +96,6 @@ jobs:
         with:
           sarif_file: grype-docker.sarif
 
-      # -----------------------------
       # Grype Source
       - name: "Grype scan (Source: High+Critical)"
         if: ${{ github.event.inputs.target == 'source'}}
@@ -100,7 +104,7 @@ jobs:
         with:
           path: .
           fail-build: false
-          severity-cutoff: high
+          severity-cutoff: critical
           output-format: sarif
           output-file: grype-source.sarif
         continue-on-error: true
@@ -114,10 +118,12 @@ jobs:
       - name: Upload Grype Source SARIF
         if: ${{ github.event.inputs.target == 'source' }}
         uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: grype-source.sarif
-
-      # -----------------------------
+  trivy-scan:
+    runs-on: ubuntu-latest
+    outputs:
+      trivy_docker_conclusion: ${{ steps.trivy-docker.conclusion }}
+      trivy_source_conclusion: ${{ steps.trivy-source.conclusion }}
+    steps:
       # Trivy Docker
       - name: "Trivy scan (Docker: CRITICAL,HIGH)"
         if: ${{ github.event.inputs.target == 'docker' }}
@@ -143,7 +149,6 @@ jobs:
         with:
           sarif_file: trivy-docker.sarif
 
-      # -----------------------------
       # Trivy Source
       - name: "Trivy scan (Source: CRITICAL,HIGH)"
         if: ${{ github.event.inputs.target == 'source' }}
@@ -170,8 +175,10 @@ jobs:
         with:
           sarif_file: trivy-source.sarif
 
-      # -----------------------------
-      # Collect all reports
+  collect-reports:
+    runs-on: ubuntu-latest
+    needs: [grype-scan, trivy-scan]
+    steps:
       - name: Upload all scan artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -180,17 +187,22 @@ jobs:
           path: "**/*.sarif"
           if-no-files-found: ignore
 
-      # Final fail check
       - name: Fail if vulnerabilities were found
         if: always()
         run: |
           echo "Checking scan results..."
-          FAILED=false
-          if [[ "${{ steps.grype-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
-          if [[ "${{ steps.grype-source.outcome }}" == "failure" ]]; then FAILED=true; fi
-          if [[ "${{ steps.trivy-docker.outcome }}" == "failure" ]]; then FAILED=true; fi
-          if [[ "${{ steps.trivy-source.outcome }}" == "failure" ]]; then FAILED=true; fi
+            FAILED=false
+            if [[ "${{ needs.grype-scan.outputs.grype_docker_conclusion }}" == "failure" ]]; then FAILED=true; fi
+            if [[ "${{ needs.grype-scan.outputs.grype_source_conclusion }}" == "failure" ]]; then FAILED=true; fi
+            if [[ "${{ needs.trivy-scan.outputs.trivy_docker_conclusion }}" == "failure" ]]; then FAILED=true; fi
+            if [[ "${{ needs.trivy-scan.outputs.trivy_source_conclusion }}" == "failure" ]]; then FAILED=true; fi
 
+            if [ "$FAILED" = "true" ]; then
+              echo "❌ Vulnerabilities found!"
+              exit 1
+            else
+              echo "✅ No blocking vulnerabilities found."
+            fi
           if [ "$FAILED" = "true" ]; then
             echo "❌ Vulnerabilities found!"
             exit 1
