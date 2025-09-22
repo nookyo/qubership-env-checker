@@ -168,35 +168,36 @@ jobs:
         with:
           sarif_file: ${{ needs.init.outputs.trivy-file-name }}.sarif
 
-  snyk-scan :
+  snyk-scan:
     runs-on: ubuntu-latest
     needs: [init]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: "Snyk scan (Docker: ${{ env.TRIVY_SEVERITY }})"
+      # Docker scan
+      - name: "Snyk scan (Docker)"
         if: ${{ github.event.inputs.target == 'docker' }}
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
-        continue-on-error: true
+          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }}
+          sarif: true
 
-      - name: Run Snyk Source scan
+      # Source scan
+      - name: "Snyk scan (Source)"
         if: ${{ github.event.inputs.target == 'source' }}
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
-        continue-on-error: true
+          args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }}
 
       - name: Upload Snyk SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ needs.init.outputs.snyk_file_name }}.sarif
+          sarif_file: snyk.sarif
 
   collect-reports:
     runs-on: ubuntu-latest
