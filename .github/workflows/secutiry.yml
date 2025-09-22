@@ -208,6 +208,12 @@ jobs:
           done
 
 
+      - name: Upload raw Snyk SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-snyk-sarif
+          path: snyk.sarif
+
       # Upload all SARIF runs
       - name: Upload Snyk SARIFs
         uses: github/codeql-action/upload-sarif@v3
