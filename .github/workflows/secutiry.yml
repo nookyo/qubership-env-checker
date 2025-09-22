@@ -48,7 +48,7 @@ jobs:
           else
             echo "image=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
           fi
-          echo "GRYPE_SARIF_FILE_NAME=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
+          echo "$GRYPE_SARIF_FILE_NAME=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
 
       - name: Scan plan
         run: |
