@@ -129,23 +129,24 @@ jobs:
       - name: "Trivy scan (Docker: ${{ env.TRIVY_SEVERITY }})"
         if: ${{ github.event.inputs.target == 'docker' }}
         id: trivy-docker
-        uses: aquasecurity/trivy-action@0.16.0
+        uses: aquasecurity/trivy-action@0.33.0
         with:
           image-ref: "${{ needs.init.outputs.image }}"
-          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
           severity: ${{ env.TRIVY_SEVERITY }}
+          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+          format: 'sarif'
         continue-on-error: true
 
       # Trivy Source
       - name: "Trivy scan (Source: ${{ env.TRIVY_SEVERITY }})"
         if: ${{ github.event.inputs.target == 'source' }}
         id: trivy-source
-        uses: aquasecurity/trivy-action@0.16.0
+        uses: aquasecurity/trivy-action@0.33.0
         with:
           scan-type: "fs"
-          ignore-unfixed: true
-          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
           severity: ${{ env.TRIVY_SEVERITY }}
+          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+          format: 'sarif'
         continue-on-error: true
 
       - name: Filter Trivy Docker SARIF
