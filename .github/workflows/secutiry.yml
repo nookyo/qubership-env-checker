@@ -182,6 +182,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
+        continue-on-error: true
 
       - name: Run Snyk Source scan
         if: ${{ github.event.inputs.target == 'source' }}
@@ -190,13 +191,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
-        continue-on-error: true   
+        continue-on-error: true
 
       - name: Upload Snyk SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ needs.init.outputs.snyk_file_name }}.sarif
-        continue-on-error: true
 
   collect-reports:
     runs-on: ubuntu-latest
