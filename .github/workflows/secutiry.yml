@@ -91,6 +91,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: "${{ needs.init.outputs.image }}"
+          output-file: $GRYPE_FILE_TYPE.sarif
           fail-build: false
           severity-cutoff: critical
 
@@ -101,6 +102,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           path: .
+          output-file: $GRYPE_FILE_TYPE.sarif
           fail-build: false
           severity-cutoff: critical
         continue-on-error: true
