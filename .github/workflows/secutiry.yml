@@ -35,6 +35,7 @@ jobs:
     outputs:
       image: ${{ steps.vars.outputs.image }}
       grype-file-name: ${{ steps.vars.outputs.grype_file_name }}
+      trivy-file-name: ${{ steps.vars.outputs.trivy_file_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,6 +49,7 @@ jobs:
             echo "image=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
           fi
           echo "grype_file_name=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}" >> $GITHUB_OUTPUT
+          echo "trivy_file_name=${{ github.event.inputs.target == 'docker' && 'trivy-docker' || 'trivy-source' }}" >> $GITHUB_OUTPUT
 
       - name: Scan plan
         run: |
