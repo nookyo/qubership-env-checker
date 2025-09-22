@@ -80,6 +80,7 @@ jobs:
     outputs:
       grype_docker_conclusion: ${{ steps.grype-docker.conclusion }}
       grype_source_conclusion: ${{ steps.grype-source.conclusion }}
+
     steps:
       # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
@@ -112,66 +113,54 @@ jobs:
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
       - name: Upload Grype Source SARIF
-        if: ${{ github.event.inputs.target == 'source' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ needs.init.outputs.grype-file-name }}.sarif
 
-  # trivy-scan:
-  #   runs-on: ubuntu-latest
-  #   needs: [init]
-  #   outputs:
-  #     trivy_docker_conclusion: ${{ steps.trivy-docker.conclusion }}
-  #     trivy_source_conclusion: ${{ steps.trivy-source.conclusion }}
-  #   steps:
-  #     # Trivy Docker
-  #     - name: "Trivy scan (Docker: ${{ env.TRIVY_SEVERITY }})"
-  #       if: ${{ github.event.inputs.target == 'docker' }}
-  #       id: trivy-docker
-  #       uses: aquasecurity/trivy-action@0.16.0
-  #       with:
-  #         image-ref: "${{ needs.init.outputs.image }}"
-  #         output: ${{ needs.init.outputs.trivy-file-name }}.sarif
-  #         severity: ${{ env.TRIVY_SEVERITY }}
-  #       continue-on-error: true
+  trivy-scan:
+    runs-on: ubuntu-latest
+    needs: [init]
+    outputs:
+      trivy_docker_conclusion: ${{ steps.trivy-docker.conclusion }}
+      trivy_source_conclusion: ${{ steps.trivy-source.conclusion }}
 
-  #     # Trivy Source
-  #     - name: "Trivy scan (Source: ${{ env.TRIVY_SEVERITY }})"
-  #       if: ${{ github.event.inputs.target == 'source' }}
-  #       id: trivy-source
-  #       uses: aquasecurity/trivy-action@0.16.0
-  #       with:
-  #         scan-type: "fs"
-  #         ignore-unfixed: true
-  #         output: ${{ needs.init.outputs.trivy-file-name }}.sarif
-  #         severity: ${{ env.TRIVY_SEVERITY }}
-  #       continue-on-error: true
+    steps:
+      # Trivy Docker
+      - name: "Trivy scan (Docker: ${{ env.TRIVY_SEVERITY }})"
+        if: ${{ github.event.inputs.target == 'docker' }}
+        id: trivy-docker
+        uses: aquasecurity/trivy-action@0.16.0
+        with:
+          image-ref: "${{ needs.init.outputs.image }}"
+          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+          severity: ${{ env.TRIVY_SEVERITY }}
+        continue-on-error: true
 
-  #     - name: Filter Trivy Docker SARIF
-  #       if: ${{ github.event.inputs.filter_strict }}
-  #       run: |
-  #         SARIF_FILE=${{ needs.init.outputs.trivy-file-name }}.sarif
-  #         jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
-  #         mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
+      # Trivy Source
+      - name: "Trivy scan (Source: ${{ env.TRIVY_SEVERITY }})"
+        if: ${{ github.event.inputs.target == 'source' }}
+        id: trivy-source
+        uses: aquasecurity/trivy-action@0.16.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+          severity: ${{ env.TRIVY_SEVERITY }}
+        continue-on-error: true
 
-  #     - name: Upload Trivy Docker SARIF
-  #       if: ${{ github.event.inputs.target == 'docker' }}
-  #       uses: github/codeql-action/upload-sarif@v3
-  #       with:
-  #         sarif_file: trivy-docker.sarif
+      - name: Filter Trivy Docker SARIF
+        if: ${{ github.event.inputs.filter_strict }}
+        run: |
+          SARIF_FILE=${{ needs.init.outputs.trivy-file-name }}.sarif
+          jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
+
+      - name: Upload Trivy Docker SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ needs.init.outputs.trivy-file-name }}.sarif
 
 
-  #     # - name: Filter Trivy Source SARIF
-  #     #   if: ${{ (github.event.inputs.target == 'source' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
-  #     #   run: |
-  #     #     jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-source.sarif > trivy-source.filtered.sarif
-  #     #     mv trivy-source.filtered.sarif trivy-source.sarif
-
-  #     - name: Upload Trivy Source SARIF
-  #       if: ${{ github.event.inputs.target == 'source' }}
-  #       uses: github/codeql-action/upload-sarif@v3
-  #       with:
-  #         sarif_file: trivy-source.sarif
 
   collect-reports:
     runs-on: ubuntu-latest
