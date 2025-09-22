@@ -134,7 +134,7 @@ jobs:
           image-ref: "${{ needs.init.outputs.image }}"
           severity: ${{ env.TRIVY_SEVERITY }}
           output: ${{ needs.init.outputs.trivy-file-name }}.sarif
-          format: 'sarif'
+          format: "sarif"
         continue-on-error: true
 
       # Trivy Source
@@ -146,7 +146,7 @@ jobs:
           scan-type: "fs"
           severity: ${{ env.TRIVY_SEVERITY }}
           output: ${{ needs.init.outputs.trivy-file-name }}.sarif
-          format: 'sarif'
+          format: "sarif"
         continue-on-error: true
 
       - name: Filter Trivy Docker SARIF
@@ -161,7 +161,24 @@ jobs:
         with:
           sarif_file: ${{ needs.init.outputs.trivy-file-name }}.sarif
 
+  snyk-scan:
+    runs-on: ubuntu-latest
+    needs: [init]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Snyk scan Docker image
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload Snyk SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-report.sarif
 
   collect-reports:
     runs-on: ubuntu-latest
