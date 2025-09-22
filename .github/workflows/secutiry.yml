@@ -201,11 +201,12 @@ jobs:
           mkdir -p sarif-splits
           count=$(jq '.runs | length' snyk.sarif)
           for i in $(seq 0 $((count - 1))); do
-            jq --arg cat "snyk-$i" \
-              '{ version: "2.1.0", runs: [ .runs[$i] + { automationDetails: { category: $cat } } ] }' \
+            jq --argjson idx $i --arg cat "snyk-$i" \
+              '{ version: "2.1.0", runs: [ .runs[$idx] + { automationDetails: { category: $cat } } ] }' \
               snyk.sarif > sarif-splits/snyk-$i.sarif
             echo "Created sarif-splits/snyk-$i.sarif with category snyk-$i"
           done
+
 
       # Upload all SARIF runs
       - name: Upload Snyk SARIFs
