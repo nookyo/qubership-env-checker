@@ -103,11 +103,11 @@ jobs:
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
-      - name: Upload Grype Source SARIF
-        if: ${{ github.event.inputs.target == 'source' }}
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: grype-source.sarif
+      # - name: Upload Grype Source SARIF
+      #   if: ${{ github.event.inputs.target == 'source' }}
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: grype-source.sarif
 
   # trivy-scan:
   #   runs-on: ubuntu-latest
