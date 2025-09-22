@@ -184,7 +184,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_TOKEN }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
+          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
 
       - name: Run Snyk Source scan
         if: ${{ github.event.inputs.target != 'source' }}
