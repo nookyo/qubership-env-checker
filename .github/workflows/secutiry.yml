@@ -20,6 +20,21 @@ on:
         required: false
         default: true
         type: boolean
+      trivy-scan:
+        description: "Enable Trivy scan"
+        required: false
+        default: true
+        type: boolean
+      grype-scan:
+        description: "Enable Grype scan"
+        required: false
+        default: true
+        type: boolean
+      snyk-scan:
+        description: "Enable Snyk scan"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
