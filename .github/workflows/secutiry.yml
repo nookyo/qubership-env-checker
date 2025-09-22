@@ -1,4 +1,4 @@
-name: On-demand Security Scan (Grype + Trivy)
+name: On-demand Security Scan (Grype + Trivy + Snyk)
 run-name: "Security Scan [${{ github.event.inputs.target }}, Scope: ${{ github.event.inputs.filter_strict == 'true' && 'High + Critical' || 'All' }}] by @${{ github.actor }} #${{ github.run_number }}"
 on:
   workflow_dispatch:
@@ -26,8 +26,9 @@ permissions:
   security-events: write
 
 env:
-  GRYPE_SEVERITY: "CRITICAL"
-  TRIVY_SEVERITY: "CRITICAL,HIGH"
+  GRYPE_SEVERITY: "critical"
+  TRIVY_SEVERITY: "Critical,high"
+  SNYK_SEVERITY: "high"
 
 jobs:
   init:
@@ -36,6 +37,7 @@ jobs:
       image: ${{ steps.vars.outputs.image }}
       grype-file-name: ${{ steps.vars.outputs.grype_file_name }}
       trivy-file-name: ${{ steps.vars.outputs.trivy_file_name }}
+      snyk_file_name: ${{ steps.vars.outputs.snyk_file_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,6 +52,7 @@ jobs:
           fi
           echo "grype_file_name=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}" >> $GITHUB_OUTPUT
           echo "trivy_file_name=${{ github.event.inputs.target == 'docker' && 'trivy-docker' || 'trivy-source' }}" >> $GITHUB_OUTPUT
+          echo "snyk_file_name=${{ github.event.inputs.target == 'docker' && 'snyk-docker' || 'snyk-source' }}" >> $GITHUB_OUTPUT
 
       - name: Scan plan
         run: |
@@ -77,10 +80,6 @@ jobs:
   grype-scan:
     runs-on: ubuntu-latest
     needs: [init]
-    outputs:
-      grype_docker_conclusion: ${{ steps.grype-docker.conclusion }}
-      grype_source_conclusion: ${{ steps.grype-source.conclusion }}
-
     steps:
       # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
@@ -120,10 +119,6 @@ jobs:
   trivy-scan:
     runs-on: ubuntu-latest
     needs: [init]
-    outputs:
-      trivy_docker_conclusion: ${{ steps.trivy-docker.conclusion }}
-      trivy_source_conclusion: ${{ steps.trivy-source.conclusion }}
-
     steps:
       # Trivy Docker
       - name: "Trivy scan (Docker: ${{ env.TRIVY_SEVERITY }})"
@@ -168,17 +163,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Snyk scan Docker image
+      - name: "Snyk scan (Docker: ${{ env.TRIVY_SEVERITY }})"
+        if: ${{ github.event.inputs.target != 'docker' }}
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_TOKEN }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
+
+      - name: Run Snyk Source scan
+        if: ${{ github.event.inputs.target != 'source' }}
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=${{ env.SNYK_TOKEN }} --sarif-file-output=${{ needs.init.outputs.snyk_file_name }}.sarif
 
       - name: Upload Snyk SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: snyk-report.sarif
+          sarif_file: ${{ needs.init.outputs.snyk_file_name }}.sarif
 
   collect-reports:
     runs-on: ubuntu-latest
