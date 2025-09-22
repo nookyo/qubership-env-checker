@@ -26,7 +26,7 @@ permissions:
   security-events: write
 
 env:
-  GRYPE_SARIF_FILE_NAME: "grype-docker"
+  GRYPE_SARIF_FILE_NAME: "docker"
   GRYPE_SEVERITY: "CRITICAL"
   TRIVY_FILE_TYPE: "trivy-docker"
   TRIVY_SEVERITY: "CRITICAL,HIGH"
