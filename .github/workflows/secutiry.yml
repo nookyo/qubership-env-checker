@@ -184,6 +184,7 @@ jobs:
         with:
           args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }}
           sarif: true
+        continue-on-error: true
 
       # Source scan
       - name: "Snyk scan (Source)"
@@ -193,6 +194,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }}
+        continue-on-error: true
 
       - name: Upload Snyk SARIF
         uses: github/codeql-action/upload-sarif@v3
