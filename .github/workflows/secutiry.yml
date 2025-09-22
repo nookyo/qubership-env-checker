@@ -201,7 +201,7 @@ jobs:
 
   collect-reports:
     runs-on: ubuntu-latest
-    needs: [grype-scan, trivy-scan]
+    needs: [grype-scan, trivy-scan, snyk-scan]
     steps:
       - name: Upload all scan artifacts
         if: always()
