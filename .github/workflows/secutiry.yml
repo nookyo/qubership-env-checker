@@ -196,15 +196,15 @@ jobs:
         continue-on-error: true
 
       # Split SARIF into multiple files (one run per file)
-      - name: Split SARIF into runs with unique categories
+      - name: Split SARIF into runs with unique IDs
         run: |
           mkdir -p sarif-splits
           count=$(jq '.runs | length' snyk.sarif)
           for i in $(seq 0 $((count - 1))); do
-            jq --argjson idx $i --arg cat "snyk-$i" \
-              '{ version: "2.1.0", runs: [ .runs[$idx] + { automationDetails: { category: $cat } } ] }' \
+            jq --argjson idx $i --arg id "snyk-$i" \
+              '{ version: "2.1.0", runs: [ .runs[$idx] + { automationDetails: { id: $id } } ] }' \
               snyk.sarif > sarif-splits/snyk-$i.sarif
-            echo "Created sarif-splits/snyk-$i.sarif with category snyk-$i"
+            echo "Created sarif-splits/snyk-$i.sarif with automationDetails.id=snyk-$i"
           done
 
 
