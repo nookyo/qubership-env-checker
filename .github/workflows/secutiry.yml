@@ -115,7 +115,7 @@ jobs:
         if: ${{ github.event.inputs.target == 'source' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ env.GRYPE_SARIF_FILE_NAME }}.sarif
+          sarif_file: ${{ needs.init.outputs.grype-file-name }}.sarif
 
   # trivy-scan:
   #   runs-on: ubuntu-latest
