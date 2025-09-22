@@ -21,17 +21,17 @@ on:
         default: true
         type: boolean
       trivy-scan:
-        description: "Enable Trivy scan"
+        description: "Trivy scan"
         required: false
         default: true
         type: boolean
       grype-scan:
-        description: "Enable Grype scan"
+        description: "Grype scan"
         required: false
         default: true
         type: boolean
       snyk-scan:
-        description: "Enable Snyk scan"
+        description: "Snyk scan"
         required: false
         default: true
         type: boolean
