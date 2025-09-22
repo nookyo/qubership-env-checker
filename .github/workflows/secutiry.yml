@@ -26,9 +26,7 @@ permissions:
   security-events: write
 
 env:
-  GRYPE_SARIF_FILE_NAME: "docker"
   GRYPE_SEVERITY: "CRITICAL"
-  TRIVY_FILE_TYPE: "trivy-docker"
   TRIVY_SEVERITY: "CRITICAL,HIGH"
 
 jobs:
@@ -36,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.vars.outputs.image }}
+      grype-file-name: ${{ steps.vars.outputs.grype_file_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,7 +47,7 @@ jobs:
           else
             echo "image=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
           fi
-          echo "$GRYPE_SARIF_FILE_NAME=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
+          echo "grype_file_name=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}" >> $GITHUB_OUTPUT
 
       - name: Scan plan
         run: |
@@ -76,8 +75,6 @@ jobs:
   grype-scan:
     runs-on: ubuntu-latest
     needs: [init]
-    env:
-      FILE_NAME: ""
     outputs:
       grype_docker_conclusion: ${{ steps.grype-docker.conclusion }}
       grype_source_conclusion: ${{ steps.grype-source.conclusion }}
@@ -89,7 +86,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: "${{ needs.init.outputs.image }}"
-          output-file: ${{ env.GRYPE_SARIF_FILE_NAME }}.sarif
+          output-file: ${{ needs.init.outputs.grype-file-name }}.sarif
           fail-build: false
           severity-cutoff: critical
 
@@ -100,7 +97,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           path: .
-          output-file: ${{ env.GRYPE_SARIF_FILE_NAME }}.sarif
+          output-file: ${{ needs.init.outputs.grype-file-name }}.sarif
           fail-build: false
           severity-cutoff: critical
         continue-on-error: true
