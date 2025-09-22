@@ -182,8 +182,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }}
-          sarif: true
+          args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
         continue-on-error: true
 
       # Source scan
@@ -193,13 +192,25 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }}
+          args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
         continue-on-error: true
 
-      - name: Upload Snyk SARIF
+      # Split SARIF into multiple files (one run per file)
+      - name: Split SARIF into runs
+        run: |
+          i=0
+          mkdir -p sarif-splits
+          jq -c '.runs[]' snyk.sarif | while read run; do
+            echo "$run" | jq '{ "version": "2.1.0", "runs": [.] }' > sarif-splits/snyk-$i.sarif
+            echo "Created sarif-splits/snyk-$i.sarif"
+            i=$((i+1))
+          done
+
+      # Upload all SARIF runs
+      - name: Upload Snyk SARIFs
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: snyk.sarif
+          sarif_file: sarif-splits
 
   collect-reports:
     runs-on: ubuntu-latest
