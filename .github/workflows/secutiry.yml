@@ -83,7 +83,7 @@ jobs:
     steps:
       # Grype Docker
       - name: "Grype scan (Docker: High+Critical)"
-        if: ${{ github.event.inputs.target == 'docker'}}
+        if: ${{ inputs.target == 'docker'}}
         id: grype-docker
         uses: anchore/scan-action@v7
         with:
@@ -94,7 +94,7 @@ jobs:
 
       # Grype Source
       - name: "Grype scan (Source: High+Critical)"
-        if: ${{ github.event.inputs.target == 'source'}}
+        if: ${{ inputs.target == 'source'}}
         id: grype-source
         uses: anchore/scan-action@v7
         with:
@@ -105,9 +105,9 @@ jobs:
         continue-on-error: true
 
       - name: Filter Grype Source SARIF
-        if: ${{ github.event.inputs.target == 'source' && github.event.inputs.filter_strict }}
+        if: ${{ inputs.filter_strict }}
         run: |
-          SARIF_FILE=${{ steps.grype-source.outputs.sarif }}
+          SARIF_FILE=${{ needs.init.outputs.grype-file-name }}.sarif
           jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
@@ -125,23 +125,34 @@ jobs:
   #     trivy_source_conclusion: ${{ steps.trivy-source.conclusion }}
   #   steps:
   #     # Trivy Docker
-  #     - name: "Trivy scan (Docker: CRITICAL,HIGH)"
+  #     - name: "Trivy scan (Docker: ${{ env.TRIVY_SEVERITY }})"
   #       if: ${{ github.event.inputs.target == 'docker' }}
   #       id: trivy-docker
   #       uses: aquasecurity/trivy-action@0.16.0
   #       with:
   #         image-ref: "${{ needs.init.outputs.image }}"
-  #         format: "sarif"
-  #         output: trivy-docker.sarif
-  #         severity: "CRITICAL,HIGH"
-  #         exit-code: "0"
+  #         output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+  #         severity: ${{ env.TRIVY_SEVERITY }}
+  #       continue-on-error: true
+
+  #     # Trivy Source
+  #     - name: "Trivy scan (Source: ${{ env.TRIVY_SEVERITY }})"
+  #       if: ${{ github.event.inputs.target == 'source' }}
+  #       id: trivy-source
+  #       uses: aquasecurity/trivy-action@0.16.0
+  #       with:
+  #         scan-type: "fs"
+  #         ignore-unfixed: true
+  #         output: ${{ needs.init.outputs.trivy-file-name }}.sarif
+  #         severity: ${{ env.TRIVY_SEVERITY }}
   #       continue-on-error: true
 
   #     - name: Filter Trivy Docker SARIF
-  #       if: ${{ (github.event.inputs.target == 'docker') && github.event.inputs.filter_strict }}
+  #       if: ${{ github.event.inputs.filter_strict }}
   #       run: |
-  #         jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' trivy-docker.sarif > trivy-docker.filtered.sarif
-  #         mv trivy-docker.filtered.sarif trivy-docker.sarif
+  #         SARIF_FILE=${{ needs.init.outputs.trivy-file-name }}.sarif
+  #         jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+  #         mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
   #     - name: Upload Trivy Docker SARIF
   #       if: ${{ github.event.inputs.target == 'docker' }}
@@ -149,19 +160,6 @@ jobs:
   #       with:
   #         sarif_file: trivy-docker.sarif
 
-  #     # Trivy Source
-  #     - name: "Trivy scan (Source: CRITICAL,HIGH)"
-  #       if: ${{ github.event.inputs.target == 'source' }}
-  #       id: trivy-source
-  #       uses: aquasecurity/trivy-action@0.16.0
-  #       with:
-  #         scan-type: "fs"
-  #         ignore-unfixed: true
-  #         format: "sarif"
-  #         output: trivy-source.sarif
-  #         severity: "CRITICAL,HIGH"
-  #         exit-code: "0"
-  #       continue-on-error: true
 
   #     # - name: Filter Trivy Source SARIF
   #     #   if: ${{ (github.event.inputs.target == 'source' || github.event.inputs.target == 'both') && github.event.inputs.filter_strict }}
