@@ -50,7 +50,7 @@ jobs:
           fi
       - name: Setup variables
         run: |
-          echo "GRYPE_FILE_TYPE=${{ inputs.filter_strict == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
+          echo "GRYPE_FILE_TYPE=${{ github.event.inputs.target == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
 
       - name: Scan plan
         run: |
