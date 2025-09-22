@@ -25,6 +25,12 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  GRYPE_FILE_TYPE: "grype-docker"
+  GRYPE_SEVERITY: "CRITICAL"
+  TRIVY_FILE_TYPE: "trivy-docker"
+  TRIVY_SEVERITY: "CRITICAL,HIGH"
+
 jobs:
   init:
     runs-on: ubuntu-latest
@@ -42,6 +48,9 @@ jobs:
           else
             echo "image=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
           fi
+      - name: Setup variables
+        run: |
+          echo "GRYPE_FILE_TYPE=${{ inputs.filter_strict == 'docker' && 'grype-docker' || 'grype-source' }}  " >> $GITHUB_ENV
 
       - name: Scan plan
         run: |
