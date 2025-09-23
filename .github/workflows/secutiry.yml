@@ -43,7 +43,7 @@ on:
 permissions:
   contents: read
   security-events: write
-  packages: read # для pull приватных образов из GHCR
+  packages: read
 
 env:
   GRYPE_SEVERITY: "critical"
