@@ -29,15 +29,15 @@ on:
         required: false
         default: true
         type: boolean
-      snyk-scan:
-        description: "Snyk scan"
-        required: false
-        default: true
-        type: boolean
+      # snyk-scan:
+      #   description: "Snyk scan"
+      #   required: false
+      #   default: true
+      #   type: boolean
       continue-on-error:
         description: "Continue on error"
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
