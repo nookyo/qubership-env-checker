@@ -55,9 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.vars.outputs.image }}
-      # grype-file-name: ${{ steps.vars.outputs.grype_file_name }}
-      # trivy-file-name: ${{ steps.vars.outputs.trivy_file_name }}
-      # snyk_file_name: ${{ steps.vars.outputs.snyk_file_name }}
     steps:
       - name: Define variables
         id: vars
