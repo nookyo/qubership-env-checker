@@ -183,10 +183,10 @@ jobs:
           format: "sarif"
         continue-on-error: ${{ github.event.inputs['continue-on-error'] == 'true' }}
 
-      - name: Filter Grype SARIF
+      - name: Filter Trivy SARIF
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
-          SARIF_FILE=grype.sarif
+          SARIF_FILE=trivy.sarif
           jq '.runs[].results |= map(select((.properties.tags[]? | ascii_upcase) == "HIGH" or (.properties.tags[]? | ascii_upcase) == "CRITICAL"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
