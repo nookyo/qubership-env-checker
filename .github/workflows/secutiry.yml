@@ -35,6 +35,11 @@ on:
         required: false
         default: true
         type: boolean
+      continue-on-error:
+        description: "Continue on error"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -101,6 +106,7 @@ jobs:
           output-file: grype.sarif
           fail-build: false
           severity-cutoff: critical
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       # Grype Source
       - name: "Grype scan (Source: High+Critical)"
@@ -112,7 +118,7 @@ jobs:
           output-file: grype.sarif
           fail-build: false
           severity-cutoff: critical
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       - name: Filter Grype Source SARIF
         if: ${{ inputs.filter_strict }}
@@ -141,7 +147,7 @@ jobs:
           severity: ${{ env.TRIVY_SEVERITY }}
           output: trivy.sarif
           format: "sarif"
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       # Trivy Source
       - name: "Trivy scan (Source: ${{ env.TRIVY_SEVERITY }})"
@@ -153,7 +159,7 @@ jobs:
           severity: ${{ env.TRIVY_SEVERITY }}
           output: trivy.sarif
           format: "sarif"
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       - name: Filter Trivy Docker SARIF
         if: ${{ github.event.inputs.filter_strict }}
@@ -183,7 +189,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       # Source scan
       - name: "Snyk scan (Source)"
@@ -193,7 +199,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
-        continue-on-error: true
+        continue-on-error: ${{ inputs.continue-on-error }}
 
       # Split SARIF into multiple files (one run per file)
       - name: Split SARIF into runs with unique IDs
