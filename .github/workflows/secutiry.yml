@@ -126,8 +126,9 @@ jobs:
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
           SARIF_FILE=grype.sarif
-          jq '.runs[].results |= map(select(.message.text | test("A (high|critical) vulnerability"; "i")))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          jq '.runs[].results |= map(select(.help.text | test("Severity: (high|critical)"; "i")))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
+
 
       - name: Upload Grype SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -182,12 +183,13 @@ jobs:
           format: "sarif"
         continue-on-error: ${{ github.event.inputs['continue-on-error'] == 'true' }}
 
-      - name: Filter Trivy SARIF
+      - name: Filter Grype SARIF
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
-          SARIF_FILE=trivy.sarif
-          jq '.runs[].results |= map(select(.message.text | test("Severity: (HIGH|CRITICAL)($|\\s)"; "i")))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          SARIF_FILE=grype.sarif
+          jq '.runs[].results |= map(select((.properties.tags[]? | ascii_upcase) == "HIGH" or (.properties.tags[]? | ascii_upcase) == "CRITICAL"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
+
 
       - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v3
