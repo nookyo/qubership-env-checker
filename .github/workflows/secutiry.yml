@@ -126,7 +126,12 @@ jobs:
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
           SARIF_FILE=grype.sarif
-          jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          jq '.
+            runs[].results |= map(
+              select(
+                (.message.text | test("A (high|critical) vulnerability"; "i"))
+              )
+            )' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
       - name: Upload Grype SARIF
@@ -186,7 +191,12 @@ jobs:
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
           SARIF_FILE=trivy.sarif
-          jq '.runs[].results |= map(select(.level=="error" or .level=="warning"))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          jq '.
+            runs[].results |= map(
+              select(
+                (.message.text | test("Severity: (HIGH|CRITICAL)"; "i"))
+              )
+            )' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
       - name: Upload Trivy SARIF
