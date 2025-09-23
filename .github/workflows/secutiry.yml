@@ -126,9 +126,8 @@ jobs:
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
           SARIF_FILE=grype.sarif
-          jq '.runs[].results |= map(select(.help.text | test("Severity: (high|critical)"; "i")))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
+          jq '.runs[].results |= map(select((.help.text // "" | test("Severity: (high|critical)"; "i"))))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif"
           mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
-
 
       - name: Upload Grype SARIF
         uses: github/codeql-action/upload-sarif@v3
