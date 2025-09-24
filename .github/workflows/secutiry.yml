@@ -15,7 +15,7 @@ on:
         required: false
         default: ""
       filter_strict:
-        description: "Scope SARIF to only HIGH+CRITICAL"
+        description: "Scope only HIGH + CRITICAL"
         required: false
         default: true
         type: boolean
