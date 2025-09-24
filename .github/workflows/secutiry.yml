@@ -1,4 +1,4 @@
-name: On-demand Security Scan (Grype + Trivy + Snyk)
+name: On-demand Security Scan (Grype + Trivy)
 run-name: "Security Scan [${{ github.event.inputs.target }}, Scope: ${{ github.event.inputs.filter_strict == 'true' && 'High + Critical' || 'All' }}] by @${{ github.actor }} #${{ github.run_number }}"
 
 on:
