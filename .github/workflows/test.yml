@@ -37,7 +37,7 @@ on:
         type: boolean
 
 jobs:
-  call-security-scan:
+  security-scan:
     uses: netcracker/qubership-workflow-hub/.github/workflows/re-security-scan.yml@379-feat-security-check-re-usable-workflow-grype-and-trivy
     with:
       target: ${{ github.event.inputs.target }}
