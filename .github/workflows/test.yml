@@ -12,26 +12,26 @@ on:
           - docker
           - source
       image:
-        description: "Docker image (для docker). По умолчанию ghcr.io/<owner>/<repo>:latest"
+        description: "Docker image (for docker). By default ghcr.io/<owner>/<repo>:latest"
         required: false
         default: ""
       only-high-critical:
-        description: "Сканировать только HIGH + CRITICAL"
+        description: "Scan only HIGH + CRITICAL"
         required: false
         default: true
         type: boolean
       trivy-scan:
-        description: "Выполнить Trivy scan"
+        description: "Run Trivy scan"
         required: false
         default: true
         type: boolean
       grype-scan:
-        description: "Выполнить Grype scan"
+        description: "Run Grype scan"
         required: false
         default: true
         type: boolean
       continue-on-error:
-        description: "Не падать при ошибках"
+        description: "Continue on error"
         required: false
         default: true
         type: boolean
