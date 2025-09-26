@@ -1,0 +1,48 @@
+name: Run Security Scan (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Scan part"
+        required: true
+        default: "docker"
+        type: choice
+        options:
+          - docker
+          - source
+      image:
+        description: "Docker image (для docker). По умолчанию ghcr.io/<owner>/<repo>:latest"
+        required: false
+        default: ""
+      only-high-critical:
+        description: "Сканировать только HIGH + CRITICAL"
+        required: false
+        default: true
+        type: boolean
+      trivy-scan:
+        description: "Выполнить Trivy scan"
+        required: false
+        default: true
+        type: boolean
+      grype-scan:
+        description: "Выполнить Grype scan"
+        required: false
+        default: true
+        type: boolean
+      continue-on-error:
+        description: "Не падать при ошибках"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  call-security-scan:
+    uses: netcracker/qubership-workflow-hub/.github/workflows/re-security-scan.yml@379-feat-security-check-re-usable-workflow-grype-and-trivy
+    with:
+      target: ${{ github.event.inputs.target }}
+      image: ${{ github.event.inputs.image }}
+      only-high-critical: ${{ github.event.inputs['only-high-critical'] }}
+      trivy-scan: ${{ github.event.inputs['trivy-scan'] }}
+      grype-scan: ${{ github.event.inputs['grype-scan'] }}
+      continue-on-error: ${{ github.event.inputs['continue-on-error'] }}
