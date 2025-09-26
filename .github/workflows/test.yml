@@ -42,7 +42,7 @@ jobs:
     with:
       target: ${{ github.event.inputs.target }}
       image: ${{ github.event.inputs.image }}
-      only-high-critical: ${{ github.event.inputs['only-high-critical'] }}
-      trivy-scan: ${{ github.event.inputs['trivy-scan'] }}
-      grype-scan: ${{ github.event.inputs['grype-scan'] }}
-      continue-on-error: ${{ github.event.inputs['continue-on-error'] }}
+      only-high-critical: ${{ inputs.only-high-critical }}
+      trivy-scan: ${{ inputs.trivy-scan }}
+      grype-scan: ${{ inputs.grype-scan }}
+      continue-on-error: ${{ inputs.continue-on-error }}
