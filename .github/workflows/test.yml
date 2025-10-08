@@ -38,7 +38,7 @@ on:
 
 jobs:
   security-scan:
-    uses: netcracker/qubership-workflow-hub/.github/workflows/re-security-scan.yml@379-feat-security-check-re-usable-workflow-grype-and-trivy
+    uses: netcracker/qubership-workflow-hub/.github/workflows/re-security-scan.yml@main
     with:
       target: ${{ github.event.inputs.target }}
       image: ${{ github.event.inputs.image }}
@@ -46,3 +46,4 @@ jobs:
       trivy-scan: ${{ inputs.trivy-scan }}
       grype-scan: ${{ inputs.grype-scan }}
       continue-on-error: ${{ inputs.continue-on-error }}
+      ignore-unfixed: false
